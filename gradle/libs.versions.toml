@@ -1,0 +1,34 @@
+[versions]
+# common libraries
+commonsIo = "2.18.0"
+configurateYaml = "4.2.0"
+flowNbt = "2.0.0"
+incendoCloud = "2.0.0"
+incendoCloudMinecraft = "2.0.0-beta.10"
+jetbrainsAnnotations = "26.0.2"
+lettuceCore = "6.5.4.RELEASE"
+lombok = "1.18.36"
+zstdJni = "1.5.7-1"
+
+
+
+# server software
+paper = "1.16.5-R0.1-SNAPSHOT"
+
+[libraries]
+# common libraries
+commonsIo = { module = "commons-io:commons-io", version.ref = "commonsIo" }
+configurateYaml = { module = "org.spongepowered:configurate-yaml", version.ref = "configurateYaml" }
+flowNbt = { module = "com.flowpowered:flow-nbt", version.ref = "flowNbt" }
+jetbrainsAnnotations = { module = "org.jetbrains:annotations", version.ref = "jetbrainsAnnotations" }
+lettuceCore = { module = "io.lettuce:lettuce-core", version.ref = "lettuceCore" }
+lombok = { module = "org.projectlombok:lombok", version.ref = "lombok" }
+zstdJni = { module = "com.github.luben:zstd-jni", version.ref = "zstdJni" }
+
+# incendo cloud
+incendoCloudAnnotations = { module = "org.incendo:cloud-annotations", version.ref = "incendoCloud" }
+incendoCloudMinecraftExtras = { module = "org.incendo:cloud-minecraft-extras", version.ref = "incendoCloudMinecraft" }
+incendoCloudPaper = { module = "org.incendo:cloud-paper", version.ref = "incendoCloudMinecraft" }
+
+# server software
+paperApi = { module = "com.destroystokyo.paper:paper-api", version.ref = "paper" }
