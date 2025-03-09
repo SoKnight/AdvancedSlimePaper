@@ -10,9 +10,13 @@ import org.incendo.cloud.suggestion.SuggestionProvider;
 
 import java.util.concurrent.CompletableFuture;
 
-public class KnownSlimeWorldSuggestionProvider implements SuggestionProvider<CommandSender> {
+public final class KnownSlimeWorldSuggestionProvider implements SuggestionProvider<CommandSender> {
+
     @Override
-    public @NonNull CompletableFuture<? extends @NonNull Iterable<? extends @NonNull Suggestion>> suggestionsFuture(@NonNull CommandContext<CommandSender> context, @NonNull CommandInput input) {
+    public @NonNull CompletableFuture<? extends @NonNull Iterable<? extends @NonNull Suggestion>> suggestionsFuture(
+            @NonNull CommandContext<CommandSender> context,
+            @NonNull CommandInput input
+    ) {
         return CompletableFuture.supplyAsync(() ->
                 ConfigManager.getWorldConfig()
                         .getWorlds()
@@ -22,4 +26,5 @@ public class KnownSlimeWorldSuggestionProvider implements SuggestionProvider<Com
                         .toList()
         );
     }
+
 }

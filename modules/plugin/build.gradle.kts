@@ -3,20 +3,34 @@ plugins {
 }
 
 dependencies {
+    packaged(projects.modules.api)
     packaged(projects.modules.loaders)
 
     packaged(libs.configurateYaml)
     packaged(libs.incendoCloudAnnotations)
     packaged(libs.incendoCloudMinecraftExtras)
     packaged(libs.incendoCloudPaper)
+    packaged(libs.lettuceCore)
 
     compileOnly(libs.paperApi)
 }
 
+tasks.processResources {
+    inputs.property("project.version", rootProject.version)
+
+    filesMatching(listOf("plugin.yml")) {
+        expand(project.properties)
+    }
+}
+
 tasks.shadowJar {
-    relocate("org.bstats", "com.grinderwolf.swm.internal.bstats")
-    relocate("ninja.leaping.configurate", "com.grinderwolf.swm.internal.configurate")
-    relocate("com.flowpowered.nbt", "com.grinderwolf.swm.internal.nbt")
-    relocate("io.lettuce", "com.grinderwolf.swm.internal.lettuce")
-    relocate("org.bson", "com.grinderwolf.swm.internal.bson")
+    dependencies {
+        exclude { it.moduleGroup == "io.netty" }
+    }
+
+    relocate("org.bstats", "com.infernalsuite.aswm.internal.bstats")
+    relocate("ninja.leaping.configurate", "com.infernalsuite.aswm.internal.configurate")
+    relocate("com.flowpowered.nbt", "com.infernalsuite.aswm.internal.nbt")
+    relocate("io.lettuce", "com.infernalsuite.aswm.internal.lettuce")
+    relocate("org.bson", "com.infernalsuite.aswm.internal.bson")
 }

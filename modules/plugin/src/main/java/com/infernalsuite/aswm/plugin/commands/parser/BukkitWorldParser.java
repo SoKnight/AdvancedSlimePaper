@@ -17,17 +17,21 @@ import org.incendo.cloud.suggestion.SuggestionProvider;
 
 import java.util.concurrent.CompletableFuture;
 
-public class BukkitWorldParser implements ArgumentParser<CommandSender, World> {
-    @Override
-    public @NonNull ArgumentParseResult<@NonNull World> parse(@NonNull CommandContext<@NonNull CommandSender> commandContext, @NonNull CommandInput commandInput) {
-        String input = commandInput.peekString();
-        World loaded = Bukkit.getWorld(input);
+public final class BukkitWorldParser implements ArgumentParser<CommandSender, World> {
 
-        if (loaded == null) {
+    @Override
+    public @NonNull ArgumentParseResult<@NonNull World> parse(
+            @NonNull CommandContext<@NonNull CommandSender> commandContext,
+            @NonNull CommandInput commandInput
+    ) {
+        String input = commandInput.peekString();
+
+        World loaded = Bukkit.getWorld(input);
+        if (loaded == null)
             return ArgumentParseResult.failure(new MessageCommandException(SlimeCommand.COMMAND_PREFIX.append(
-                    Component.text("World " + input + " is not loaded!").color(NamedTextColor.RED)
+                    Component.text("World '%s' is not loaded!".formatted(input)).color(NamedTextColor.RED)
             )));
-        }
+
         commandInput.readString();
         return ArgumentParseResult.success(loaded);
     }
@@ -42,4 +46,5 @@ public class BukkitWorldParser implements ArgumentParser<CommandSender, World> {
                         .toList()
         );
     }
+
 }

@@ -11,18 +11,16 @@ import com.infernalsuite.aswm.serialization.slime.reader.impl.v1_9.v1_9SlimeWorl
 import java.util.List;
 import java.util.Optional;
 
-public class v1_17WorldUpgrade implements Upgrade {
+public final class v1_17WorldUpgrade implements Upgrade {
 
     @Override
     public void upgrade(v1_9SlimeWorld world) {
         for (v1_9SlimeChunk chunk : world.chunks.values()) {
             for (v1_9SlimeChunkSection section : chunk.sections) {
-                if (section == null) {
+                if (section == null)
                     continue;
-                }
 
                 List<CompoundTag> palette = section.palette.getValue();
-
                 for (CompoundTag blockTag : palette) {
                     Optional<String> name = blockTag.getStringValue("Name");
                     CompoundMap map = blockTag.getValue();

@@ -4,7 +4,9 @@ import com.flowpowered.nbt.CompoundTag;
 import com.infernalsuite.aswm.api.loaders.SlimeLoader;
 import com.infernalsuite.aswm.api.world.properties.SlimePropertyMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
+import lombok.AllArgsConstructor;
 
+@AllArgsConstructor
 public class v1_9SlimeWorld {
 
     public byte version;
@@ -14,22 +16,6 @@ public class v1_9SlimeWorld {
     public final CompoundTag extraCompound;
     public final SlimePropertyMap propertyMap;
     public final boolean readOnly;
-
-    public v1_9SlimeWorld(byte version,
-                   String worldName,
-                   SlimeLoader loader,
-                   Long2ObjectMap<v1_9SlimeChunk> chunks,
-                   CompoundTag extraCompound,
-                   SlimePropertyMap propertyMap,
-                   boolean readOnly) {
-        this.version = version;
-        this.worldName = worldName;
-        this.loader = loader;
-        this.chunks = chunks;
-        this.extraCompound = extraCompound;
-        this.propertyMap = propertyMap;
-        this.readOnly = readOnly;
-    }
 
 
 }

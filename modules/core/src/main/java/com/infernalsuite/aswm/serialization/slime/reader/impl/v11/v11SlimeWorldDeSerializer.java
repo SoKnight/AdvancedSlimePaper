@@ -6,8 +6,6 @@ import com.flowpowered.nbt.ListTag;
 import com.flowpowered.nbt.stream.NBTInputStream;
 import com.github.luben.zstd.Zstd;
 import com.infernalsuite.aswm.Util;
-import com.infernalsuite.aswm.api.exceptions.CorruptedWorldException;
-import com.infernalsuite.aswm.api.exceptions.NewerFormatException;
 import com.infernalsuite.aswm.api.loaders.SlimeLoader;
 import com.infernalsuite.aswm.api.utils.NibbleArray;
 import com.infernalsuite.aswm.api.world.SlimeChunk;
@@ -27,9 +25,7 @@ import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.nio.ByteOrder;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 public class v11SlimeWorldDeSerializer implements VersionedByteSlimeWorldReader<SlimeWorld> {
@@ -37,7 +33,14 @@ public class v11SlimeWorldDeSerializer implements VersionedByteSlimeWorldReader<
     public static final int ARRAY_SIZE = 16 * 16 * 16 / (8 / 4);
 
     @Override
-    public SlimeWorld deserializeWorld(byte version, @Nullable SlimeLoader loader, String worldName, DataInputStream dataStream, SlimePropertyMap propertyMap, boolean readOnly) throws IOException, CorruptedWorldException, NewerFormatException {
+    public SlimeWorld deserializeWorld(
+            byte version,
+            @Nullable SlimeLoader loader,
+            String worldName,
+            DataInputStream dataStream,
+            SlimePropertyMap propertyMap,
+            boolean readOnly
+    ) throws IOException {
         int worldVersion = dataStream.readInt();
 
         byte[] chunkBytes = readCompressed(dataStream);
@@ -59,6 +62,7 @@ public class v11SlimeWorldDeSerializer implements VersionedByteSlimeWorldReader<
         return new SkeletonSlimeWorld(worldName, loader, readOnly, chunks, extraTag, worldPropertyMap, worldVersion);
     }
 
+    @SuppressWarnings("ResultOfMethodCallIgnored")
     private static Long2ObjectMap<SlimeChunk> readChunks(SlimePropertyMap slimePropertyMap, byte[] chunkBytes) throws IOException {
         Long2ObjectMap<SlimeChunk> chunkMap = new Long2ObjectOpenHashMap<>();
         DataInputStream chunkData = new DataInputStream(new ByteArrayInputStream(chunkBytes));
@@ -151,6 +155,8 @@ public class v11SlimeWorldDeSerializer implements VersionedByteSlimeWorldReader<
         int decompressedLength = stream.readInt();
         byte[] compressedData = new byte[compressedLength];
         byte[] decompressedData = new byte[decompressedLength];
+
+        //noinspection ResultOfMethodCallIgnored
         stream.read(compressedData);
         Zstd.decompress(decompressedData, compressedData);
         return decompressedData;

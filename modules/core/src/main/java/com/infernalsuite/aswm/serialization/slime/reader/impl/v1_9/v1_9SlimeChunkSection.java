@@ -3,7 +3,9 @@ package com.infernalsuite.aswm.serialization.slime.reader.impl.v1_9;
 import com.flowpowered.nbt.CompoundTag;
 import com.flowpowered.nbt.ListTag;
 import com.infernalsuite.aswm.api.utils.NibbleArray;
+import lombok.AllArgsConstructor;
 
+@AllArgsConstructor
 public class v1_9SlimeChunkSection {
 
     // Pre 1.13 block data
@@ -20,16 +22,5 @@ public class v1_9SlimeChunkSection {
 
     public final NibbleArray blockLight;
     public final NibbleArray skyLight;
-
-    public v1_9SlimeChunkSection(byte[] blocks, NibbleArray data, ListTag<CompoundTag> palette, long[] blockStates, CompoundTag blockStatesTag, CompoundTag biomeTag, NibbleArray blockLight, NibbleArray skyLight) {
-        this.blocks = blocks;
-        this.data = data;
-        this.palette = palette;
-        this.blockStates = blockStates;
-        this.blockStatesTag = blockStatesTag;
-        this.biomeTag = biomeTag;
-        this.blockLight = blockLight;
-        this.skyLight = skyLight;
-    }
 
 }

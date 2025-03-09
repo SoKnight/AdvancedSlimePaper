@@ -1,6 +1,6 @@
 package com.infernalsuite.aswm.api.exceptions;
 
-import java.io.File;
+import java.nio.file.Path;
 
 /**
  * Exception thrown when a folder does
@@ -8,11 +8,12 @@ import java.io.File;
  */
 public class InvalidWorldException extends SlimeException {
 
-    public InvalidWorldException(File worldDir, String reason) {
-        super("Directory " + worldDir.getPath() + " does not contain a valid MC world! " + reason);
+    public InvalidWorldException(Path worldDir, String reason) {
+        super("Directory '%s' does not contain a valid MC world! %s".formatted(worldDir, reason));
     }
 
-    public InvalidWorldException(File worldDir) {
-        super("Directory " + worldDir.getPath() + " does not contain a valid MC world!");
+    public InvalidWorldException(Path worldDir) {
+        super("Directory '%s' does not contain a valid MC world!".formatted(worldDir));
     }
+
 }

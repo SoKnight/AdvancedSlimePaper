@@ -1,10 +1,5 @@
 package com.infernalsuite.aswm.plugin;
 
-import com.infernalsuite.aswm.plugin.commands.CommandManager;
-import com.infernalsuite.aswm.plugin.config.ConfigManager;
-import com.infernalsuite.aswm.plugin.config.WorldData;
-import com.infernalsuite.aswm.plugin.config.WorldsConfig;
-import com.infernalsuite.aswm.plugin.loader.LoaderManager;
 import com.infernalsuite.aswm.api.AdvancedSlimePaperAPI;
 import com.infernalsuite.aswm.api.SlimeNMSBridge;
 import com.infernalsuite.aswm.api.exceptions.CorruptedWorldException;
@@ -13,7 +8,12 @@ import com.infernalsuite.aswm.api.exceptions.UnknownWorldException;
 import com.infernalsuite.aswm.api.loaders.SlimeLoader;
 import com.infernalsuite.aswm.api.world.SlimeWorld;
 import com.infernalsuite.aswm.api.world.properties.SlimePropertyMap;
-import org.bstats.bukkit.Metrics;
+import com.infernalsuite.aswm.plugin.commands.CommandManager;
+import com.infernalsuite.aswm.plugin.config.ConfigManager;
+import com.infernalsuite.aswm.plugin.config.WorldData;
+import com.infernalsuite.aswm.plugin.config.WorldsConfig;
+import com.infernalsuite.aswm.plugin.loader.LoaderManager;
+import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -23,18 +23,15 @@ import java.util.*;
 
 public class SWPlugin extends JavaPlugin {
 
-    private static final AdvancedSlimePaperAPI ASP = AdvancedSlimePaperAPI.instance();
-    private static final int BSTATS_ID = 5419;
+    private static final AdvancedSlimePaperAPI API = AdvancedSlimePaperAPI.instance();
+    private static SWPlugin INSTANCE;
 
-    private final Map<String, SlimeWorld> worldsToLoad = new HashMap<>();
-    private LoaderManager loaderManager;
+    private final Map<String, SlimeWorld> worldsToLoad;
+    @Getter private LoaderManager loaderManager;
 
-    public static SWPlugin getInstance() {
-        return SWPlugin.getPlugin(SWPlugin.class);
-    }
-
-    public LoaderManager getLoaderManager() {
-        return loaderManager;
+    public SWPlugin() {
+        INSTANCE = this;
+        this.worldsToLoad = new HashMap<>();
     }
 
     @Override
@@ -53,10 +50,9 @@ public class SWPlugin extends JavaPlugin {
         // Default world override
         try {
             Properties props = new Properties();
-
             props.load(new FileInputStream("server.properties"));
-            String defaultWorldName = props.getProperty("level-name");
 
+            String defaultWorldName = props.getProperty("level-name");
             if (erroredWorlds.contains(defaultWorldName)) {
                 getSLF4JLogger().error("Shutting down server, as the default world could not be loaded.");
                 Bukkit.getServer().shutdown();
@@ -80,15 +76,13 @@ public class SWPlugin extends JavaPlugin {
 
     @Override
     public void onEnable() {
-        Metrics metrics = new Metrics(this, BSTATS_ID);
-
         CommandManager commandManager = new CommandManager(this);
 
         worldsToLoad.values().stream()
                 .filter(slimeWorld -> Objects.isNull(Bukkit.getWorld(slimeWorld.getName())))
                 .forEach(slimeWorld -> {
                     try {
-                        ASP.loadWorld(slimeWorld, true);
+                        API.loadWorld(slimeWorld, true);
                     } catch (RuntimeException exception) {
                         getSLF4JLogger().error("Failed to load world: {}", slimeWorld.getName(), exception);
                     }
@@ -100,30 +94,23 @@ public class SWPlugin extends JavaPlugin {
     private List<String> loadWorlds() {
         List<String> erroredWorlds = new ArrayList<>();
         WorldsConfig config = ConfigManager.getWorldConfig();
-
         for (Map.Entry<String, WorldData> entry : config.getWorlds().entrySet()) {
             String worldName = entry.getKey();
             WorldData worldData = entry.getValue();
-
             if (worldData.isLoadOnStartup()) {
                 try {
                     SlimeLoader loader = loaderManager.getLoader(worldData.getDataSource());
-
-                    if (loader == null) {
-                        throw new IllegalArgumentException("invalid data source " + worldData.getDataSource());
-                    }
+                    if (loader == null)
+                        throw new IllegalArgumentException("invalid data source '%s'".formatted(worldData.getDataSource()));
 
                     SlimePropertyMap propertyMap = worldData.toPropertyMap();
-                    SlimeWorld world = ASP.readWorld(loader, worldName, worldData.isReadOnly(), propertyMap);
-
+                    SlimeWorld world = API.readWorld(loader, worldName, worldData.isReadOnly(), propertyMap);
                     worldsToLoad.put(worldName, world);
                 } catch (IllegalArgumentException | UnknownWorldException | NewerFormatException |
                          CorruptedWorldException | IOException ex) {
                     String message;
-
                     if (ex instanceof IllegalArgumentException) {
                         message = ex.getMessage();
-
                         //noinspection CallToPrintStackTrace
                         ex.printStackTrace();
                     } else if (ex instanceof UnknownWorldException) {
@@ -134,12 +121,11 @@ public class SWPlugin extends JavaPlugin {
                         message = "world seems to be corrupted.";
                     } else {
                         message = "";
-
                         //noinspection CallToPrintStackTrace
                         ex.printStackTrace();
                     }
 
-                    getSLF4JLogger().error("Failed to load world {}{}", worldName, message.isEmpty() ? "." : ": " + message);
+                    getSLF4JLogger().error("Failed to load world '{}'{}", worldName, message.isEmpty() ? "." : ": " + message);
                     erroredWorlds.add(worldName);
                 }
             }
@@ -148,4 +134,9 @@ public class SWPlugin extends JavaPlugin {
         config.save();
         return erroredWorlds;
     }
+
+    public static SWPlugin getInstance() {
+        return INSTANCE;
+    }
+
 }

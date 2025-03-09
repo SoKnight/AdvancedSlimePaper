@@ -14,4 +14,5 @@ public class SlimeLogger {
             LOGGER.log(Level.WARNING, message);
         }
     }
+
 }

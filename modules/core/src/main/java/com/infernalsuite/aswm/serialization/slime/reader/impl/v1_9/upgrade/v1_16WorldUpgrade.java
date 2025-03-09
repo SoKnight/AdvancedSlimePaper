@@ -10,7 +10,7 @@ import com.infernalsuite.aswm.serialization.slime.reader.impl.v1_9.v1_9SlimeWorl
 
 import java.util.Arrays;
 
-public class v1_16WorldUpgrade implements Upgrade {
+public final class v1_16WorldUpgrade implements Upgrade {
 
     private static final int[] MULTIPLY_DE_BRUIJN_BIT_POSITION = new int[]{
             0, 1, 28, 2, 29, 14, 24, 3, 30, 22, 20, 15, 25, 17, 4, 8, 31, 27, 13, 23, 21, 19, 16, 7, 26, 12, 18, 6, 11, 5, 10, 9
@@ -22,18 +22,14 @@ public class v1_16WorldUpgrade implements Upgrade {
             // Add padding to height maps and block states
             CompoundTag heightMaps = chunk.heightMap;
 
-            for (Tag<?> map : heightMaps.getValue().values()) {
-                if (map instanceof LongArrayTag arrayTag) {
+            for (Tag<?> map : heightMaps.getValue().values())
+                if (map instanceof LongArrayTag arrayTag)
                     arrayTag.setValue(addPadding(256, 9, arrayTag.getValue()));
-                }
-            }
 
             for (int sectionIndex = 0; sectionIndex < chunk.sections.length; sectionIndex++) {
                 v1_9SlimeChunkSection section = chunk.sections[sectionIndex];
-
                 if (section != null) {
                     int bitsPerBlock = Math.max(4, ceillog2(section.palette.getValue().size()));
-
                     if (!isPowerOfTwo(bitsPerBlock)) {
                         section = new v1_9SlimeChunkSection(null, null, section.palette,
                                 addPadding(4096, bitsPerBlock, section.blockStates), null, null,
@@ -48,7 +44,6 @@ public class v1_16WorldUpgrade implements Upgrade {
             Arrays.fill(newBiomes, -1);
             int[] biomes = chunk.biomes;
             System.arraycopy(biomes, 0, newBiomes, 0, biomes.length);
-
             chunk.biomes = newBiomes;
         }
     }
@@ -75,10 +70,8 @@ public class v1_16WorldUpgrade implements Upgrade {
     // Taken from DataConverterBitStorageAlign.java
     private static long[] addPadding(int indices, int bitsPerIndex, long[] originalArray) {
         int k = originalArray.length;
-
-        if (k == 0) {
+        if (k == 0)
             return originalArray;
-        }
 
         long l = (1L << bitsPerIndex) - 1L;
         int i1 = 64 / bitsPerIndex;
@@ -124,10 +117,10 @@ public class v1_16WorldUpgrade implements Upgrade {
             }
         }
 
-        if (i2 != 0L) {
+        if (i2 != 0L)
             along1[k1] = i2;
-        }
 
         return along1;
     }
+
 }

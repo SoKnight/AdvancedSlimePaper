@@ -14,21 +14,26 @@ import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import java.io.IOException;
 
 public class SlimeCommand {
-    public static final TextComponent COMMAND_PREFIX = LegacyComponentSerializer.legacySection().deserialize(
-            "§9§lSWP §7§l>> §r"
-    );
+
+    public static final TextComponent COMMAND_PREFIX = LegacyComponentSerializer.legacySection().deserialize("§9§lSWP §7§l>> §r");
 
     protected final CommandManager commandManager;
     protected final SWPlugin plugin;
-    protected final AdvancedSlimePaperAPI asp = AdvancedSlimePaperAPI.instance();
+    protected final AdvancedSlimePaperAPI api;
 
     public SlimeCommand(CommandManager commandManager) {
         this.commandManager = commandManager;
         this.plugin = commandManager.getPlugin();
+        this.api = AdvancedSlimePaperAPI.instance();
     }
 
     // This method is here so that we can easily change the behavior in the future
-    protected SlimeWorld getWorldReadyForCloning(String name, SlimeLoader loader, SlimePropertyMap propertyMap) throws CorruptedWorldException, NewerFormatException, UnknownWorldException, IOException {
-        return asp.readWorld(loader, name, false, propertyMap);
+    protected SlimeWorld getWorldReadyForCloning(
+            String name,
+            SlimeLoader loader,
+            SlimePropertyMap propertyMap
+    ) throws CorruptedWorldException, NewerFormatException, UnknownWorldException, IOException {
+        return api.readWorld(loader, name, false, propertyMap);
     }
+
 }

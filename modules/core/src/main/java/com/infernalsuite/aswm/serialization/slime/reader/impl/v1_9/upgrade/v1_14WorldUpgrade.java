@@ -8,12 +8,11 @@ import com.infernalsuite.aswm.serialization.slime.reader.impl.v1_9.v1_9SlimeWorl
 
 import java.util.*;
 
-public class v1_14WorldUpgrade implements Upgrade {
+public final class v1_14WorldUpgrade implements Upgrade {
 
     private static final int[] VILLAGER_XP = { 0, 10, 50, 100, 150 };
 
-    private static Map<String, String> oldToNewMap = new HashMap<>();
-    private static Map<String, String> newToOldMap = new HashMap<>();
+    private static final Map<String, String> oldToNewMap = new HashMap<>();
 
     static {
         rename("minecraft:tube_coral_fan", "minecraft:tube_coral_wall_fan");
@@ -28,7 +27,6 @@ public class v1_14WorldUpgrade implements Upgrade {
 
     private static void rename(String oldName, String newName) {
         oldToNewMap.put(oldName, newName);
-        newToOldMap.put(newName, oldName);
     }
 
     @Override
@@ -37,22 +35,18 @@ public class v1_14WorldUpgrade implements Upgrade {
             // Update renamed blocks
             for (int sectionIndex = 0; sectionIndex < chunk.sections.length; sectionIndex++) {
                 v1_9SlimeChunkSection section = chunk.sections[sectionIndex];
-
                 if (section != null) {
                     List<CompoundTag> palette = section.palette.getValue();
-
                     for (int paletteIndex = 0; paletteIndex < palette.size(); paletteIndex++) {
                         CompoundTag blockTag = palette.get(paletteIndex);
-                        String name = blockTag.getStringValue("Name").get();
+                        String name = blockTag.getStringValue("Name").orElseThrow();
 
                         // Trapped chests have now a different tile entity,
                         // so we have to update every block entity type
-                        if (name.equals("minecraft:trapped_chest")) {
+                        if (name.equals("minecraft:trapped_chest"))
                             updateBlockEntities(chunk, sectionIndex, paletteIndex, "minecraft:chest", "minecraft:trapped_chest");
-                        }
 
                         String newName = oldToNewMap.get(name);
-
                         if (newName != null) {
                             blockTag.getValue().put("Name", new StringTag("Name", newName));
                         }
@@ -62,20 +56,17 @@ public class v1_14WorldUpgrade implements Upgrade {
 
             if (chunk.entities != null) {
                 for (CompoundTag entityTag : chunk.entities) {
-                    String type = entityTag.getStringValue("id").get();
-
+                    String type = entityTag.getStringValue("id").orElseThrow();
                     switch (type) {
                         case "minecraft:ocelot":
                             // Cats are no longer ocelots
                             int catType = entityTag.getIntValue("CatType").orElse(0);
-
                             if (catType == 0) {
                                 Optional<String> owner = entityTag.getStringValue("Owner");
                                 Optional<String> ownerId = entityTag.getStringValue("OwnerUUID");
 
-                                if (owner.isPresent() || ownerId.isPresent()) {
+                                if (owner.isPresent() || ownerId.isPresent())
                                     entityTag.getValue().put("Trusting", new ByteTag("Trusting", (byte) 1));
-                                }
 
                                 entityTag.getValue().remove("CatType");
                             } else if (catType > 0 && catType < 4) {
@@ -91,7 +82,6 @@ public class v1_14WorldUpgrade implements Upgrade {
 
                             // Villager level and xp has to be rebuilt
                             Optional<CompoundTag> offersOpt = entityTag.getAsCompoundTag("Offers");
-
                             if (offersOpt.isPresent()) {
                                 if (careerLevel == 0 || careerLevel == 1) {
                                     int amount = offersOpt.flatMap((offers) -> offers.getAsCompoundTag("Recipes")).map((recipes) -> recipes.getValue().size()).orElse(0);
@@ -100,10 +90,8 @@ public class v1_14WorldUpgrade implements Upgrade {
                             }
 
                             Optional<CompoundTag> xp = entityTag.getAsCompoundTag("Xp");
-
-                            if (!xp.isPresent()) {
+                            if (xp.isEmpty())
                                 entityTag.getValue().put("Xp", new IntTag("Xp", VILLAGER_XP[clamp(careerLevel - 1, 0, VILLAGER_XP.length - 1)]));
-                            }
 
                             entityTag.getValue().remove("Profession");
                             entityTag.getValue().remove("Career");
@@ -119,7 +107,6 @@ public class v1_14WorldUpgrade implements Upgrade {
                         case "minecraft:banner":
                             // The illager banners changed the translation message
                             Optional<String> customName = entityTag.getStringValue("CustomName");
-
                             if (customName.isPresent()) {
                                 String newName = customName.get().replace("\"translate\":\"block.minecraft.illager_banner\"",
                                         "\"translate\":\"block.minecraft.ominous_banner\"");
@@ -134,16 +121,31 @@ public class v1_14WorldUpgrade implements Upgrade {
     }
 
     private int clamp(int i, int i1, int i2) {
-        return i < i1 ? i1 : (i > i2 ? i2 : i);
+        return i < i1 ? i1 : Math.min(i, i2);
     }
 
     private String getVillagerProfession(int profession, int career) {
-        return profession == 0 ? (career == 2 ? "minecraft:fisherman" : (career == 3 ? "minecraft:shepherd" : (career == 4 ? "minecraft:fletcher" : "minecraft:farmer")))
-                : (profession == 1 ? (career == 2 ? "minecraft:cartographer" : "minecraft:librarian") : (profession == 2 ? "minecraft:cleric" :
-                (profession == 3 ? (career == 2 ? "minecraft:weaponsmith" : (career == 3 ? "minecraft:toolsmith" : "minecraft:armorer")) :
-                        (profession == 4 ? (career == 2 ? "minecraft:leatherworker" : "minecraft:butcher") : (profession == 5 ? "minecraft:nitwit" : "minecraft:none")))));
+        return switch (profession) {
+            case 0 -> switch (career) {
+                case 2 -> "minecraft:fisherman";
+                case 3 -> "minecraft:shepherd";
+                case 4 -> "minecraft:fletcher";
+                default -> "minecraft:farmer";
+            };
+            case 1 -> (career == 2 ? "minecraft:cartographer" : "minecraft:librarian");
+            case 2 -> "minecraft:cleric";
+            case 3 -> switch (career) {
+                case 2 -> "minecraft:weaponsmith";
+                case 3 -> "minecraft:toolsmith";
+                default -> "minecraft:armorer";
+            };
+            case 4 -> (career == 2 ? "minecraft:leatherworker" : "minecraft:butcher");
+            case 5 -> "minecraft:nitwit";
+            default -> "minecraft:none";
+        };
     }
 
+    @SuppressWarnings("SameParameterValue")
     private void updateBlockEntities(v1_9SlimeChunk chunk, int sectionIndex, int paletteIndex, String oldName, String newName) {
         if (chunk.tileEntities != null) {
             v1_9SlimeChunkSection section = chunk.sections[sectionIndex];
@@ -177,16 +179,14 @@ public class v1_14WorldUpgrade implements Upgrade {
                             int blockZ = z + chunk.z * 16;
 
                             for (CompoundTag tileEntityTag : chunk.tileEntities) {
-                                int tileX = tileEntityTag.getIntValue("x").get();
-                                int tileY = tileEntityTag.getIntValue("y").get();
-                                int tileZ = tileEntityTag.getIntValue("z").get();
+                                int tileX = tileEntityTag.getIntValue("x").orElseThrow();
+                                int tileY = tileEntityTag.getIntValue("y").orElseThrow();
+                                int tileZ = tileEntityTag.getIntValue("z").orElseThrow();
 
                                 if (tileX == blockX && tileY == blockY && tileZ == blockZ) {
-                                    String type = tileEntityTag.getStringValue("id").get();
-
-                                    if (!type.equals(oldName)) {
+                                    String type = tileEntityTag.getStringValue("id").orElseThrow();
+                                    if (!type.equals(oldName))
                                         throw new IllegalStateException("Expected block entity to be " + oldName + ", not " + type);
-                                    }
 
                                     tileEntityTag.getValue().put("id", new StringTag("id", newName));
                                     break;
@@ -198,4 +198,5 @@ public class v1_14WorldUpgrade implements Upgrade {
             }
         }
     }
+
 }

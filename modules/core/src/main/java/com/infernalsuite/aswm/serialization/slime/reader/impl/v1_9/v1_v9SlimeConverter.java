@@ -1,19 +1,20 @@
 package com.infernalsuite.aswm.serialization.slime.reader.impl.v1_9;
 
 import com.flowpowered.nbt.*;
+import com.infernalsuite.aswm.api.world.SlimeChunk;
+import com.infernalsuite.aswm.api.world.SlimeChunkSection;
+import com.infernalsuite.aswm.api.world.SlimeWorld;
 import com.infernalsuite.aswm.serialization.SlimeWorldReader;
 import com.infernalsuite.aswm.serialization.slime.reader.impl.v1_9.upgrade.*;
 import com.infernalsuite.aswm.skeleton.SkeletonSlimeWorld;
 import com.infernalsuite.aswm.skeleton.SlimeChunkSectionSkeleton;
 import com.infernalsuite.aswm.skeleton.SlimeChunkSkeleton;
-import com.infernalsuite.aswm.api.world.SlimeChunk;
-import com.infernalsuite.aswm.api.world.SlimeChunkSection;
-import com.infernalsuite.aswm.api.world.SlimeWorld;
-
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
+
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
@@ -31,6 +32,7 @@ class v1_v9SlimeConverter implements SlimeWorldReader<v1_9SlimeWorld> {
         UPGRADES.put((byte) 0x08, new v1_18WorldUpgrade());
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public SlimeWorld readFromData(v1_9SlimeWorld data) {
         int dataVersion = upgradeWorld(data);
@@ -46,8 +48,7 @@ class v1_v9SlimeConverter implements SlimeWorldReader<v1_9SlimeWorld> {
                     // I'm not sure which upgrader should handle this, so I'm leaving it here
                     if (dataSection.biomeTag != null) {
                         ListTag<StringTag> palette = (ListTag<StringTag>) dataSection.biomeTag.getValue().get("palette");
-
-                        ArrayList<StringTag> newPalette = new ArrayList<StringTag>();
+                        List<StringTag> newPalette = new ArrayList<>();
                         if (palette != null) {
                             for (StringTag stringTag : palette.getValue()) {
                                 // air is no longer a valid biome, I'm not sure when this changed,
@@ -57,9 +58,8 @@ class v1_v9SlimeConverter implements SlimeWorldReader<v1_9SlimeWorld> {
                             }
                         }
 
-                        if (palette == null || palette.getValue().isEmpty()) {
+                        if (palette == null || palette.getValue().isEmpty())
                             newPalette.add(new StringTag(null, "minecraft:plains"));
-                        }
 
                         dataSection.biomeTag.getValue().put("palette", new ListTag<>("palette", TagType.TAG_STRING, newPalette));
                     }
@@ -109,16 +109,14 @@ class v1_v9SlimeConverter implements SlimeWorldReader<v1_9SlimeWorld> {
         );
     }
 
-
     public static int upgradeWorld(v1_9SlimeWorld world) {
         byte upgradeTo = 0x08; // Last version
         int dataVersion = 3120; // MCVersions.V1_19_2
 
         for (byte ver = (byte) (world.version + 1); ver <= upgradeTo; ver++) {
             Upgrade upgrade = UPGRADES.get(ver);
-
             if (upgrade == null) {
-                Logger.getLogger("v1_9WorldUpgrader").warning("Missing world upgrader for version " + ver + ". World will not be upgraded.");
+                Logger.getLogger("v1_9WorldUpgrader").warning("Missing world upgrader for version %s. World will not be upgraded.".formatted(ver));
                 continue;
             }
 

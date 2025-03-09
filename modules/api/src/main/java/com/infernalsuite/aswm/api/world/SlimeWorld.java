@@ -100,4 +100,5 @@ public interface SlimeWorld extends PersistentDataHolder {
     SlimeWorld clone(String worldName, SlimeLoader loader) throws WorldAlreadyExistsException, IOException;
 
     int getDataVersion();
+
 }

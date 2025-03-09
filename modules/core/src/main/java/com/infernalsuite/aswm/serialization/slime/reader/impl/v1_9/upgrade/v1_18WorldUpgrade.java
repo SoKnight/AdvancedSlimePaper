@@ -8,7 +8,7 @@ import com.infernalsuite.aswm.serialization.slime.reader.impl.v1_9.v1_9SlimeWorl
 
 import java.util.*;
 
-public class v1_18WorldUpgrade implements Upgrade {
+public final class v1_18WorldUpgrade implements Upgrade {
 
     private static final String[] BIOMES_BY_ID = new String[256]; // rip datapacks
 
@@ -145,6 +145,7 @@ public class v1_18WorldUpgrade implements Upgrade {
         BIOME_UPDATE.put("minecraft:snowcapped_peaks", "minecraft:frozen_peaks");
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public void upgrade(v1_9SlimeWorld world) {
         for (v1_9SlimeChunk chunk : world.chunks.values()) {
@@ -157,7 +158,7 @@ public class v1_18WorldUpgrade implements Upgrade {
                     Optional<ListTag<?>> spawnPotentials = tileEntity.getAsListTag("SpawnPotentials");
                     Optional<CompoundTag> spawnData = tileEntity.getAsCompoundTag("SpawnData");
                     if (spawnPotentials.isPresent()) {
-                        ListTag<CompoundTag> spawnPotentialsList = (ListTag<CompoundTag>) spawnPotentials.get();
+                        ListTag<CompoundTag> spawnPotentialsList = (ListTag<CompoundTag>) spawnPotentials.orElseThrow();
                         List<CompoundTag> spawnPotentialsListValue = spawnPotentialsList.getValue();
                         for (CompoundTag spawnPotentialsTag : spawnPotentialsListValue) {
                             CompoundMap spawnPotentialsValue = spawnPotentialsTag.getValue();
@@ -180,8 +181,7 @@ public class v1_18WorldUpgrade implements Upgrade {
                         value.put("SpawnPotentials", spawnPotentialsList);
                         if (!spawnPotentialsListValue.isEmpty()) {
                             CompoundTag compoundTag = spawnPotentialsListValue.get(0);
-                            CompoundTag entityTag = compoundTag.getAsCompoundTag("data").
-                                    get().getAsCompoundTag("entity").get();
+                            CompoundTag entityTag = compoundTag.getAsCompoundTag("data").orElseThrow().getAsCompoundTag("entity").orElseThrow();
                             CompoundMap spawnDataMap = new CompoundMap();
                             spawnDataMap.put(entityTag.clone());
                             value.put("SpawnData", new CompoundTag("SpawnData", spawnDataMap));
@@ -208,10 +208,8 @@ public class v1_18WorldUpgrade implements Upgrade {
             v1_9SlimeChunkSection[] sections = chunk.sections;
             for (int i = 0; i < sections.length; i++) {
                 v1_9SlimeChunkSection section = sections[i];
-                if (section == null) {
+                if (section == null)
                     continue;
-                }
-
 
                 section.blockStatesTag = wrapPalette(section.palette, section.blockStates);
                 section.biomeTag = tags[i];
@@ -219,9 +217,7 @@ public class v1_18WorldUpgrade implements Upgrade {
 
             v1_9SlimeChunkSection[] shiftedSections = new v1_9SlimeChunkSection[sections.length + 4];
             System.arraycopy(sections, 0, shiftedSections, 4, sections.length);
-
             chunk.sections = shiftedSections; // Shift all sections up 4
-
 
             v1_9SlimeChunkSection[] sectionArray = chunk.sections;
 
@@ -251,6 +247,7 @@ public class v1_18WorldUpgrade implements Upgrade {
         }
     }
 
+    @SuppressWarnings("SameParameterValue")
     private static CompoundTag[] createBiomeSections(int[] biomes, final boolean wantExtendedHeight, final int minSection) {
         final CompoundTag[] ret = new CompoundTag[wantExtendedHeight ? 24 : 16];
 
@@ -293,6 +290,7 @@ public class v1_18WorldUpgrade implements Upgrade {
         return value == 0 ? 0 : Integer.SIZE - Integer.numberOfLeadingZeros(value - 1); // see doc of numberOfLeadingZeros
     }
 
+    @SuppressWarnings("SameParameterValue")
     private static CompoundTag createBiomeSection(final int[] biomes, final int offset, final int mask) {
         final Map<Integer, Integer> paletteId = new HashMap<>();
 
@@ -302,21 +300,19 @@ public class v1_18WorldUpgrade implements Upgrade {
         }
 
         List<StringTag> paletteString = new ArrayList<>();
-        for (final Iterator<Integer> iterator = paletteId.keySet().iterator(); iterator.hasNext(); ) {
-            final int biomeId = iterator.next();
+        for (final int biomeId : paletteId.keySet()) {
             String biome = biomeId >= 0 && biomeId < BIOMES_BY_ID.length ? BIOMES_BY_ID[biomeId] : null;
+
             String update = BIOME_UPDATE.get(biome);
-            if (update != null) {
+            if (update != null)
                 biome = update;
-            }
 
             paletteString.add(new StringTag("", biome == null ? "minecraft:plains" : biome));
         }
 
         final int bitsPerObject = ceilLog2(paletteString.size());
-        if (bitsPerObject == 0) {
+        if (bitsPerObject == 0)
             return wrapPalette(new ListTag<>("", TagType.TAG_STRING, paletteString), null);
-        }
 
         // manually create packed integer data
         final int objectsPerValue = 64 / bitsPerObject;
@@ -328,9 +324,7 @@ public class v1_18WorldUpgrade implements Upgrade {
 
         for (int biome_idx = 0; biome_idx < 64; ++biome_idx) {
             final int biome = biomes[offset + (biome_idx & mask)];
-
             curr |= ((long) paletteId.get(biome)) << shift;
-
             shift += bitsPerObject;
 
             if (shift + bitsPerObject > 64) { // will next write overflow?
@@ -342,9 +336,8 @@ public class v1_18WorldUpgrade implements Upgrade {
         }
 
         // don't forget to write the last one
-        if (shift != 0) {
+        if (shift != 0)
             packed[idx] = curr;
-        }
 
         return wrapPalette(new ListTag<>("", TagType.TAG_STRING, paletteString), packed);
     }
@@ -354,9 +347,8 @@ public class v1_18WorldUpgrade implements Upgrade {
         CompoundTag tag = new CompoundTag("", map);
 
         map.put(new ListTag<>("palette", palette.getElementType(), palette.getValue()));
-        if (blockStates != null) {
+        if (blockStates != null)
             map.put(new LongArrayTag("data", blockStates));
-        }
 
         return tag;
     }

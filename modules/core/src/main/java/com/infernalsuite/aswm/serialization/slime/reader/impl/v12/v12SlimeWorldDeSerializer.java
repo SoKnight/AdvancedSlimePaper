@@ -6,8 +6,6 @@ import com.flowpowered.nbt.ListTag;
 import com.flowpowered.nbt.stream.NBTInputStream;
 import com.github.luben.zstd.Zstd;
 import com.infernalsuite.aswm.Util;
-import com.infernalsuite.aswm.api.exceptions.CorruptedWorldException;
-import com.infernalsuite.aswm.api.exceptions.NewerFormatException;
 import com.infernalsuite.aswm.api.loaders.SlimeLoader;
 import com.infernalsuite.aswm.api.utils.NibbleArray;
 import com.infernalsuite.aswm.api.world.SlimeChunk;
@@ -27,9 +25,7 @@ import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.nio.ByteOrder;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 public class v12SlimeWorldDeSerializer implements VersionedByteSlimeWorldReader<SlimeWorld> {
@@ -37,7 +33,14 @@ public class v12SlimeWorldDeSerializer implements VersionedByteSlimeWorldReader<
     public static final int ARRAY_SIZE = 16 * 16 * 16 / (8 / 4);
 
     @Override
-    public SlimeWorld deserializeWorld(byte version, @Nullable SlimeLoader loader, String worldName, DataInputStream dataStream, SlimePropertyMap propertyMap, boolean readOnly) throws IOException, CorruptedWorldException, NewerFormatException {
+    public SlimeWorld deserializeWorld(
+            byte version,
+            @Nullable SlimeLoader loader,
+            String worldName,
+            DataInputStream dataStream,
+            SlimePropertyMap propertyMap,
+            boolean readOnly
+    ) throws IOException {
         int worldVersion = dataStream.readInt();
 
         byte[] chunkBytes = readCompressed(dataStream);
@@ -59,6 +62,7 @@ public class v12SlimeWorldDeSerializer implements VersionedByteSlimeWorldReader<
         return new SkeletonSlimeWorld(worldName, loader, readOnly, chunks, extraTag, worldPropertyMap, worldVersion);
     }
 
+    @SuppressWarnings("ResultOfMethodCallIgnored")
     private static Long2ObjectMap<SlimeChunk> readChunks(SlimePropertyMap slimePropertyMap, byte[] chunkBytes) throws IOException {
         Long2ObjectMap<SlimeChunk> chunkMap = new Long2ObjectOpenHashMap<>();
         DataInputStream chunkData = new DataInputStream(new ByteArrayInputStream(chunkBytes));
@@ -75,7 +79,6 @@ public class v12SlimeWorldDeSerializer implements VersionedByteSlimeWorldReader<
 
             int sectionCount = chunkData.readInt();
             for (int sectionId = 0; sectionId < sectionCount; sectionId++) {
-
                 // Block Light Nibble Array
                 NibbleArray blockLightArray;
                 if (chunkData.readBoolean()) {
@@ -115,17 +118,13 @@ public class v12SlimeWorldDeSerializer implements VersionedByteSlimeWorldReader<
             CompoundTag heightMaps = readCompound(heightMapData);
 
             // Tile Entities
-
             byte[] tileEntities = read(chunkData);
-
             CompoundTag tileEntitiesCompound = readCompound(tileEntities);
             @SuppressWarnings("unchecked")
             List<CompoundTag> serializedTileEntities = ((ListTag<CompoundTag>) tileEntitiesCompound.getValue().get("tileEntities")).getValue();
 
             // Entities
-
             byte[] entities = read(chunkData);
-
             CompoundTag entitiesCompound = readCompound(entities);
             @SuppressWarnings("unchecked")
             List<CompoundTag> serializedEntities = ((ListTag<CompoundTag>) entitiesCompound.getValue().get("entities")).getValue();
@@ -136,9 +135,8 @@ public class v12SlimeWorldDeSerializer implements VersionedByteSlimeWorldReader<
             CompoundTag extra = readCompound(rawExtra);
             // If the extra tag is empty, the serializer will save it as null.
             // So if we deserialize a null extra tag, we will assume it was empty.
-            if (extra == null) {
+            if (extra == null)
                 extra = new CompoundTag("", new CompoundMap());
-            }
 
             chunkMap.put(Util.chunkPosition(x, z),
                     new SlimeChunkSkeleton(x, z, chunkSections, heightMaps, serializedTileEntities, serializedEntities, extra, null));
@@ -151,6 +149,8 @@ public class v12SlimeWorldDeSerializer implements VersionedByteSlimeWorldReader<
         int decompressedLength = stream.readInt();
         byte[] compressedData = new byte[compressedLength];
         byte[] decompressedData = new byte[decompressedLength];
+
+        //noinspection ResultOfMethodCallIgnored
         stream.read(compressedData);
         Zstd.decompress(decompressedData, compressedData);
         return decompressedData;
@@ -159,16 +159,17 @@ public class v12SlimeWorldDeSerializer implements VersionedByteSlimeWorldReader<
     private static byte[] read(DataInputStream stream) throws IOException {
         int length = stream.readInt();
         byte[] data = new byte[length];
+        //noinspection ResultOfMethodCallIgnored
         stream.read(data);
         return data;
     }
 
     private static CompoundTag readCompound(byte[] tagBytes) throws IOException {
-        if (tagBytes.length == 0) {
+        if (tagBytes.length == 0)
             return null;
-        }
 
         NBTInputStream nbtStream = new NBTInputStream(new ByteArrayInputStream(tagBytes), NBTInputStream.NO_COMPRESSION, ByteOrder.BIG_ENDIAN);
         return (CompoundTag) nbtStream.readTag();
     }
+
 }

@@ -1,10 +1,14 @@
 package com.infernalsuite.aswm.api.utils;
 
+import lombok.Getter;
+import org.jetbrains.annotations.NotNull;
+
 /**
  * Credits to Minikloon for this class.
- *
+ * <p>
  * Source: https://github.com/Minikloon/CraftyWorld/blob/master/crafty-common/src/main/kotlin/world/crafty/common/utils/NibbleArray.kt
  */
+@Getter
 public class NibbleArray {
 
     private final byte[] backing;
@@ -19,7 +23,6 @@ public class NibbleArray {
 
     public int get(int index) {
         int value = this.backing[index / 2];
-
         return index % 2 == 0 ? value & 0xF : (value & 0xF0) >> 4;
     }
 
@@ -35,11 +38,9 @@ public class NibbleArray {
         }
     }
 
-    public byte[] getBacking() {
-        return backing;
-    }
-
-    public NibbleArray clone() {
+    @Override
+    public @NotNull NibbleArray clone() {
         return new NibbleArray(this.backing.clone());
     }
+
 }

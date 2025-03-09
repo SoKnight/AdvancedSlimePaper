@@ -32,15 +32,19 @@ import java.util.Optional;
 
 class v1_9SlimeWorldDeserializer implements VersionedByteSlimeWorldReader<v1_9SlimeWorld> {
 
+    @SuppressWarnings("unchecked")
     @Override
-    public v1_9SlimeWorld deserializeWorld(byte version, SlimeLoader loader, String worldName, DataInputStream dataStream, SlimePropertyMap propertyMap, boolean readOnly)
-            throws IOException, CorruptedWorldException {
-
+    public v1_9SlimeWorld deserializeWorld(
+            byte version,
+            SlimeLoader loader,
+            String worldName,
+            DataInputStream dataStream,
+            SlimePropertyMap propertyMap,
+            boolean readOnly
+    ) throws IOException, CorruptedWorldException {
         try {
-
             // World version
             byte worldVersion;
-
             if (version >= 6) {
                 worldVersion = dataStream.readByte();
             } else if (version >= 4) { // In v4 there's just a boolean indicating whether the world is pre-1.13 or post-1.13
@@ -55,12 +59,12 @@ class v1_9SlimeWorldDeserializer implements VersionedByteSlimeWorldReader<v1_9Sl
             int width = dataStream.readShort();
             int depth = dataStream.readShort();
 
-            if (width <= 0 || depth <= 0) {
+            if (width <= 0 || depth <= 0)
                 throw new CorruptedWorldException(worldName);
-            }
 
             int bitmaskSize = (int) Math.ceil((width * depth) / 8.0D);
             byte[] chunkBitmask = new byte[bitmaskSize];
+            //noinspection ResultOfMethodCallIgnored
             dataStream.read(chunkBitmask);
             BitSet chunkBitset = BitSet.valueOf(chunkBitmask);
 
@@ -68,7 +72,7 @@ class v1_9SlimeWorldDeserializer implements VersionedByteSlimeWorldReader<v1_9Sl
             int chunkDataLength = dataStream.readInt();
             byte[] compressedChunkData = new byte[compressedChunkDataLength];
             byte[] chunkData = new byte[chunkDataLength];
-
+            //noinspection ResultOfMethodCallIgnored
             dataStream.read(compressedChunkData);
 
             // Tile Entities
@@ -76,7 +80,7 @@ class v1_9SlimeWorldDeserializer implements VersionedByteSlimeWorldReader<v1_9Sl
             int tileEntitiesLength = dataStream.readInt();
             byte[] compressedTileEntities = new byte[compressedTileEntitiesLength];
             byte[] tileEntities = new byte[tileEntitiesLength];
-
+            //noinspection ResultOfMethodCallIgnored
             dataStream.read(compressedTileEntities);
 
             // Entities
@@ -85,13 +89,12 @@ class v1_9SlimeWorldDeserializer implements VersionedByteSlimeWorldReader<v1_9Sl
 
             if (version >= 3) {
                 boolean hasEntities = dataStream.readBoolean();
-
                 if (hasEntities) {
                     int compressedEntitiesLength = dataStream.readInt();
                     int entitiesLength = dataStream.readInt();
                     compressedEntities = new byte[compressedEntitiesLength];
                     entities = new byte[entitiesLength];
-
+                    //noinspection ResultOfMethodCallIgnored
                     dataStream.read(compressedEntities);
                 }
             }
@@ -105,7 +108,7 @@ class v1_9SlimeWorldDeserializer implements VersionedByteSlimeWorldReader<v1_9Sl
                 int extraTagLength = dataStream.readInt();
                 compressedExtraTag = new byte[compressedExtraTagLength];
                 extraTag = new byte[extraTagLength];
-
+                //noinspection ResultOfMethodCallIgnored
                 dataStream.read(compressedExtraTag);
             }
 
@@ -118,13 +121,12 @@ class v1_9SlimeWorldDeserializer implements VersionedByteSlimeWorldReader<v1_9Sl
                 int mapsTagLength = dataStream.readInt();
                 compressedMapsTag = new byte[compressedMapsTagLength];
                 mapsTag = new byte[mapsTagLength];
-
+                //noinspection ResultOfMethodCallIgnored
                 dataStream.read(compressedMapsTag);
             }
 
-            if (dataStream.read() != -1) {
+            if (dataStream.read() != -1)
                 throw new CorruptedWorldException(worldName);
-            }
 
             // Data decompression
             Zstd.decompress(chunkData, compressedChunkData);
@@ -138,22 +140,21 @@ class v1_9SlimeWorldDeserializer implements VersionedByteSlimeWorldReader<v1_9Sl
 
             // Entity deserialization
             CompoundTag entitiesCompound = readCompoundTag(entities);
-
             Long2ObjectMap<List<CompoundTag>> entityStorage = new Long2ObjectOpenHashMap<>();
             if (entitiesCompound != null) {
                 List<CompoundTag> serializedEntities = ((ListTag<CompoundTag>) entitiesCompound.getValue().get("entities")).getValue();
-
                 SlimeLogger.debug("Serialized entities: " + serializedEntities);
-                for (CompoundTag entityCompound : serializedEntities) {
-                    ListTag<DoubleTag> listTag = (ListTag<DoubleTag>) entityCompound.getAsListTag("Pos").get();
 
+                for (CompoundTag entityCompound : serializedEntities) {
+                    ListTag<DoubleTag> listTag = (ListTag<DoubleTag>) entityCompound.getAsListTag("Pos").orElseThrow();
                     int chunkX = floor(listTag.getValue().get(0).getValue()) >> 4;
                     int chunkZ = floor(listTag.getValue().get(2).getValue()) >> 4;
                     long chunkKey = Util.chunkPosition(chunkX, chunkZ);
+
                     v1_9SlimeChunk chunk = chunks.get(chunkKey);
-                    if (chunk != null) {
+                    if (chunk != null)
                         chunk.entities.add(entityCompound);
-                    }
+
                     if (entityStorage.containsKey(chunkKey)) {
                         entityStorage.get(chunkKey).add(entityCompound);
                     } else {
@@ -166,7 +167,6 @@ class v1_9SlimeWorldDeserializer implements VersionedByteSlimeWorldReader<v1_9Sl
 
             // Tile Entity deserialization
             CompoundTag tileEntitiesCompound = readCompoundTag(tileEntities);
-
             if (tileEntitiesCompound != null) {
                 ListTag<CompoundTag> tileEntitiesList = (ListTag<CompoundTag>) tileEntitiesCompound.getValue().get("tiles");
                 for (CompoundTag tileEntityCompound : tileEntitiesList.getValue()) {
@@ -174,9 +174,8 @@ class v1_9SlimeWorldDeserializer implements VersionedByteSlimeWorldReader<v1_9Sl
                     int chunkZ = ((IntTag) tileEntityCompound.getValue().get("z")).getValue() >> 4;
                     v1_9SlimeChunk chunk = chunks.get(Util.chunkPosition(chunkX, chunkZ));
 
-                    if (chunk == null) {
+                    if (chunk == null)
                         throw new CorruptedWorldException(worldName);
-                    }
 
                     chunk.tileEntities.add(tileEntityCompound);
                 }
@@ -184,12 +183,8 @@ class v1_9SlimeWorldDeserializer implements VersionedByteSlimeWorldReader<v1_9Sl
 
             // Extra Data
             CompoundTag extraCompound = readCompoundTag(extraTag);
-
-            if (extraCompound == null) {
+            if (extraCompound == null)
                 extraCompound = new CompoundTag("", new CompoundMap());
-            }
-
-            if (version <= 0x05) {}
 
             // World Maps
 //            CompoundTag mapsCompound = readCompoundTag(mapsTag);
@@ -200,7 +195,6 @@ class v1_9SlimeWorldDeserializer implements VersionedByteSlimeWorldReader<v1_9Sl
 //            } else {
 //                mapList = new ArrayList<>();
 //            }
-
 
             // World properties
             SlimePropertyMap worldPropertyMap = propertyMap;
@@ -221,7 +215,7 @@ class v1_9SlimeWorldDeserializer implements VersionedByteSlimeWorldReader<v1_9Sl
                     loader,
                     chunks,
                     extraCompound,
-                    propertyMap,
+                    worldPropertyMap,
                     readOnly
             );
         } catch (EOFException ex) {
@@ -245,10 +239,10 @@ class v1_9SlimeWorldDeserializer implements VersionedByteSlimeWorldReader<v1_9Sl
                 if (chunkBitset.get(bitsetIndex)) {
                     // Height Maps
                     CompoundTag heightMaps;
-
                     if (worldVersion >= 0x04) {
                         int heightMapsLength = dataStream.readInt();
                         byte[] heightMapsArray = new byte[heightMapsLength];
+                        //noinspection ResultOfMethodCallIgnored
                         dataStream.read(heightMapsArray);
                         heightMaps = readCompoundTag(heightMapsArray);
 
@@ -258,40 +252,37 @@ class v1_9SlimeWorldDeserializer implements VersionedByteSlimeWorldReader<v1_9Sl
                         }
                     } else {
                         int[] heightMap = new int[256];
-
-                        for (int i = 0; i < 256; i++) {
+                        for (int i = 0; i < 256; i++)
                             heightMap[i] = dataStream.readInt();
-                        }
 
                         CompoundMap map = new CompoundMap();
                         map.put("heightMap", new IntArrayTag("heightMap", heightMap));
-
                         heightMaps = new CompoundTag("", map);
                     }
 
                     // Biome array
                     int[] biomes = null;
-
-                    if (version == 8 && worldVersion < 0x04) {
+                    if (version == 8 && worldVersion < 0x04)
                         // Patch the v8 bug: biome array size is wrong for old worlds
                         dataStream.readInt();
-                    }
 
                     if (worldVersion < 0x04) {
                         byte[] byteBiomes = new byte[256];
+                        //noinspection ResultOfMethodCallIgnored
                         dataStream.read(byteBiomes);
                         biomes = toIntArray(byteBiomes);
                     } else if (worldVersion < 0x08) {
                         int biomesArrayLength = version >= 8 ? dataStream.readInt() : 256;
                         biomes = new int[biomesArrayLength];
-
                         for (int i = 0; i < biomes.length; i++) {
                             biomes[i] = dataStream.readInt();
                         }
                     }
 
                     // Chunk Sections
-                    ChunkSectionData data = worldVersion < 0x08 ? readChunkSections(dataStream, worldVersion, version) : readChunkSectionsNew(dataStream, worldVersion, version);
+                    ChunkSectionData data = worldVersion < 0x08
+                            ? readChunkSections(dataStream, worldVersion, version)
+                            : readChunkSectionsNew(dataStream, worldVersion, version);
 
                     int chunkX = minX + x;
                     int chunkZ = minZ + z;
@@ -318,14 +309,11 @@ class v1_9SlimeWorldDeserializer implements VersionedByteSlimeWorldReader<v1_9Sl
     private static int[] toIntArray(byte[] buf) {
         ByteBuffer buffer = ByteBuffer.wrap(buf).order(ByteOrder.BIG_ENDIAN);
         int[] ret = new int[buf.length / 4];
-
         buffer.asIntBuffer().get(ret);
-
         return ret;
     }
 
-    private record ChunkSectionData(v1_9SlimeChunkSection[] sections, int minSectionY, int maxSectionY) {
-    }
+    private record ChunkSectionData(v1_9SlimeChunkSection[] sections, int minSectionY, int maxSectionY) { }
 
     private static ChunkSectionData readChunkSectionsNew(DataInputStream dataStream, int worldVersion, int version) throws IOException {
         int minSectionY = dataStream.readInt();
@@ -338,9 +326,9 @@ class v1_9SlimeWorldDeserializer implements VersionedByteSlimeWorldReader<v1_9Sl
 
             // Block Light Nibble Array
             NibbleArray blockLightArray;
-
             if (version < 5 || dataStream.readBoolean()) {
                 byte[] blockLightByteArray = new byte[2048];
+                //noinspection ResultOfMethodCallIgnored
                 dataStream.read(blockLightByteArray);
                 blockLightArray = new NibbleArray((blockLightByteArray));
             } else {
@@ -349,10 +337,12 @@ class v1_9SlimeWorldDeserializer implements VersionedByteSlimeWorldReader<v1_9Sl
 
             // Block data
             byte[] blockStateData = new byte[dataStream.readInt()];
+            //noinspection ResultOfMethodCallIgnored
             dataStream.read(blockStateData);
             CompoundTag blockStateTag = readCompoundTag(blockStateData);
 
             byte[] biomeData = new byte[dataStream.readInt()];
+            //noinspection ResultOfMethodCallIgnored
             dataStream.read(biomeData);
             CompoundTag biomeTag = readCompoundTag(biomeData);
 
@@ -361,6 +351,7 @@ class v1_9SlimeWorldDeserializer implements VersionedByteSlimeWorldReader<v1_9Sl
 
             if (version < 5 || dataStream.readBoolean()) {
                 byte[] skyLightByteArray = new byte[2048];
+                //noinspection ResultOfMethodCallIgnored
                 dataStream.read(skyLightByteArray);
                 skyLightArray = new NibbleArray((skyLightByteArray));
             } else {
@@ -370,6 +361,7 @@ class v1_9SlimeWorldDeserializer implements VersionedByteSlimeWorldReader<v1_9Sl
             // HypixelBlocks 3
             if (version < 4) {
                 short hypixelBlocksLength = dataStream.readShort();
+                //noinspection ResultOfMethodCallIgnored
                 dataStream.skip(hypixelBlocksLength);
             }
 
@@ -382,6 +374,7 @@ class v1_9SlimeWorldDeserializer implements VersionedByteSlimeWorldReader<v1_9Sl
     private static ChunkSectionData readChunkSections(DataInputStream dataStream, byte worldVersion, int version) throws IOException {
         v1_9SlimeChunkSection[] chunkSectionArray = new v1_9SlimeChunkSection[16];
         byte[] sectionBitmask = new byte[2];
+        //noinspection ResultOfMethodCallIgnored
         dataStream.read(sectionBitmask);
         BitSet sectionBitset = BitSet.valueOf(sectionBitmask);
 
@@ -389,9 +382,9 @@ class v1_9SlimeWorldDeserializer implements VersionedByteSlimeWorldReader<v1_9Sl
             if (sectionBitset.get(i)) {
                 // Block Light Nibble Array
                 NibbleArray blockLightArray;
-
                 if (version < 5 || dataStream.readBoolean()) {
                     byte[] blockLightByteArray = new byte[2048];
+                    //noinspection ResultOfMethodCallIgnored
                     dataStream.read(blockLightByteArray);
                     blockLightArray = new NibbleArray((blockLightByteArray));
                 } else {
@@ -413,6 +406,7 @@ class v1_9SlimeWorldDeserializer implements VersionedByteSlimeWorldReader<v1_9Sl
                     for (int index = 0; index < paletteLength; index++) {
                         int tagLength = dataStream.readInt();
                         byte[] serializedTag = new byte[tagLength];
+                        //noinspection ResultOfMethodCallIgnored
                         dataStream.read(serializedTag);
 
                         CompoundTag tag = readCompoundTag(serializedTag);
@@ -424,20 +418,20 @@ class v1_9SlimeWorldDeserializer implements VersionedByteSlimeWorldReader<v1_9Sl
                     // Block states
                     int blockStatesArrayLength = dataStream.readInt();
                     blockStatesArray = new long[blockStatesArrayLength];
-
-                    for (int index = 0; index < blockStatesArrayLength; index++) {
+                    for (int index = 0; index < blockStatesArrayLength; index++)
                         blockStatesArray[index] = dataStream.readLong();
-                    }
 
                     blockArray = null;
                     dataArray = null;
                 } else {
                     // Pre 1.13
                     blockArray = new byte[4096];
+                    //noinspection ResultOfMethodCallIgnored
                     dataStream.read(blockArray);
 
                     // Block Data Nibble Array
                     byte[] dataByteArray = new byte[2048];
+                    //noinspection ResultOfMethodCallIgnored
                     dataStream.read(dataByteArray);
                     dataArray = new NibbleArray((dataByteArray));
 
@@ -447,9 +441,9 @@ class v1_9SlimeWorldDeserializer implements VersionedByteSlimeWorldReader<v1_9Sl
 
                 // Sky Light Nibble Array
                 NibbleArray skyLightArray;
-
                 if (version < 5 || dataStream.readBoolean()) {
                     byte[] skyLightByteArray = new byte[2048];
+                    //noinspection ResultOfMethodCallIgnored
                     dataStream.read(skyLightByteArray);
                     skyLightArray = new NibbleArray((skyLightByteArray));
                 } else {
@@ -459,6 +453,7 @@ class v1_9SlimeWorldDeserializer implements VersionedByteSlimeWorldReader<v1_9Sl
                 // HypixelBlocks 3
                 if (version < 4) {
                     short hypixelBlocksLength = dataStream.readShort();
+                    //noinspection ResultOfMethodCallIgnored
                     dataStream.skip(hypixelBlocksLength);
                 }
 
@@ -470,12 +465,11 @@ class v1_9SlimeWorldDeserializer implements VersionedByteSlimeWorldReader<v1_9Sl
     }
 
     private static CompoundTag readCompoundTag(byte[] serializedCompound) throws IOException {
-        if (serializedCompound.length == 0) {
+        if (serializedCompound.length == 0)
             return null;
-        }
 
         NBTInputStream stream = new NBTInputStream(new ByteArrayInputStream(serializedCompound), NBTInputStream.NO_COMPRESSION, ByteOrder.BIG_ENDIAN);
-
         return (CompoundTag) stream.readTag();
     }
+
 }

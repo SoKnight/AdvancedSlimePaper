@@ -2,8 +2,8 @@ package com.infernalsuite.aswm.api.world;
 
 import com.flowpowered.nbt.CompoundTag;
 
-import java.util.List;
 import javax.annotation.Nullable;
+import java.util.List;
 
 /**
  * In-memory representation of a SRF chunk.
@@ -72,6 +72,6 @@ public interface SlimeChunk {
      * Not intended to be serialized.
      * @return A {@link CompoundTag} containing the upgrade data of the chunk,
      */
-    @Nullable
-    CompoundTag getUpgradeData();
+    @Nullable CompoundTag getUpgradeData();
+
 }

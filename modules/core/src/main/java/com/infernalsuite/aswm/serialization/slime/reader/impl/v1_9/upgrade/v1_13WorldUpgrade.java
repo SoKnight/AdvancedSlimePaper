@@ -7,14 +7,14 @@ import com.infernalsuite.aswm.serialization.slime.reader.impl.v1_9.Upgrade;
 import com.infernalsuite.aswm.serialization.slime.reader.impl.v1_9.v1_9SlimeChunk;
 import com.infernalsuite.aswm.serialization.slime.reader.impl.v1_9.v1_9SlimeChunkSection;
 import com.infernalsuite.aswm.serialization.slime.reader.impl.v1_9.v1_9SlimeWorld;
-import org.bukkit.ChatColor;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
-public class v1_13WorldUpgrade implements Upgrade {
+public final class v1_13WorldUpgrade implements Upgrade {
 
+    @SuppressWarnings("unchecked")
     @Override
     public void upgrade(v1_9SlimeWorld world) {
         Logger.getLogger("v1_13WorldUpgrade").warning("Updating world to the 1.13 format. This may take a while.");
@@ -31,7 +31,6 @@ public class v1_13WorldUpgrade implements Upgrade {
             globalTag.getValue().put("DataVersion", new IntTag("DataVersion", 1343));
 
             CompoundTag chunkTag = new CompoundTag("Level", new CompoundMap());
-
             chunkTag.getValue().put("xPos", new IntTag("xPos", chunk.x));
             chunkTag.getValue().put("zPos", new IntTag("zPos", chunk.z));
             chunkTag.getValue().put("Sections", serializeSections(chunk.sections));
@@ -44,31 +43,27 @@ public class v1_13WorldUpgrade implements Upgrade {
             globalTag.getValue().put("Level", chunkTag);
 
             globalTag = SlimeNMSBridge.instance().convertChunkTo1_13(globalTag);
-            chunkTag = globalTag.getAsCompoundTag("Level").get();
+            chunkTag = globalTag.getAsCompoundTag("Level").orElseThrow();
 
             // Chunk sections
             v1_9SlimeChunkSection[] newSections = new v1_9SlimeChunkSection[16];
-            ListTag<CompoundTag> serializedSections = (ListTag<CompoundTag>) chunkTag.getAsListTag("Sections").get();
+            ListTag<CompoundTag> serializedSections = (ListTag<CompoundTag>) chunkTag.getAsListTag("Sections").orElseThrow();
 
             for (CompoundTag sectionTag : serializedSections.getValue()) {
-                ListTag<CompoundTag> palette = (ListTag<CompoundTag>) sectionTag.getAsListTag("Palette").get();
-                long[] blockStates = sectionTag.getLongArrayValue("BlockStates").get();
+                ListTag<CompoundTag> palette = (ListTag<CompoundTag>) sectionTag.getAsListTag("Palette").orElseThrow();
+                long[] blockStates = sectionTag.getLongArrayValue("BlockStates").orElseThrow();
 
-                NibbleArray blockLight = new NibbleArray(sectionTag.getByteArrayValue("BlockLight").get());
-                NibbleArray skyLight = new NibbleArray(sectionTag.getByteArrayValue("SkyLight").get());
-
-                int index = sectionTag.getIntValue("Y").get();
+                NibbleArray blockLight = new NibbleArray(sectionTag.getByteArrayValue("BlockLight").orElseThrow());
+                NibbleArray skyLight = new NibbleArray(sectionTag.getByteArrayValue("SkyLight").orElseThrow());
 
                 v1_9SlimeChunkSection section = new v1_9SlimeChunkSection(null, null, palette, blockStates, null, null, blockLight, skyLight);
-                newSections[index] = section;
+                newSections[sectionTag.getIntValue("Y").orElseThrow()] = section;
             }
 
             // Biomes
             int[] newBiomes = new int[256];
-
-            for (int index = 0; index < chunk.biomes.length; index++) {
+            for (int index = 0; index < chunk.biomes.length; index++)
                 newBiomes[index] = chunk.biomes[index] & 255;
-            }
 
             chunk.sections = newSections;
             chunk.biomes = newBiomes;

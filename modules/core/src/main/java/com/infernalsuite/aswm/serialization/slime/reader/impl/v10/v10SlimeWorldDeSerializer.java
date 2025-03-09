@@ -1,37 +1,31 @@
 package com.infernalsuite.aswm.serialization.slime.reader.impl.v10;
 
-import com.flowpowered.nbt.CompoundMap;
-import com.flowpowered.nbt.CompoundTag;
-import com.flowpowered.nbt.DoubleTag;
-import com.flowpowered.nbt.IntTag;
-import com.flowpowered.nbt.ListTag;
+import com.flowpowered.nbt.*;
 import com.flowpowered.nbt.stream.NBTInputStream;
 import com.github.luben.zstd.Zstd;
 import com.infernalsuite.aswm.Util;
 import com.infernalsuite.aswm.api.exceptions.CorruptedWorldException;
 import com.infernalsuite.aswm.api.loaders.SlimeLoader;
-import com.infernalsuite.aswm.serialization.slime.reader.VersionedByteSlimeWorldReader;
-import com.infernalsuite.aswm.skeleton.SkeletonSlimeWorld;
-import com.infernalsuite.aswm.skeleton.SlimeChunkSectionSkeleton;
-import com.infernalsuite.aswm.skeleton.SlimeChunkSkeleton;
 import com.infernalsuite.aswm.api.utils.NibbleArray;
 import com.infernalsuite.aswm.api.world.SlimeChunk;
 import com.infernalsuite.aswm.api.world.SlimeChunkSection;
 import com.infernalsuite.aswm.api.world.SlimeWorld;
 import com.infernalsuite.aswm.api.world.properties.SlimeProperties;
 import com.infernalsuite.aswm.api.world.properties.SlimePropertyMap;
-
+import com.infernalsuite.aswm.serialization.slime.reader.VersionedByteSlimeWorldReader;
+import com.infernalsuite.aswm.skeleton.SkeletonSlimeWorld;
+import com.infernalsuite.aswm.skeleton.SlimeChunkSectionSkeleton;
+import com.infernalsuite.aswm.skeleton.SlimeChunkSkeleton;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
+
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 
@@ -41,9 +35,14 @@ class v10SlimeWorldDeSerializer implements VersionedByteSlimeWorldReader<SlimeWo
 
     @SuppressWarnings("unchecked")
     @Override
-    public SlimeWorld deserializeWorld(byte version, SlimeLoader loader, String worldName, DataInputStream dataStream, SlimePropertyMap propertyMap, boolean readOnly)
-            throws IOException, CorruptedWorldException {
-
+    public SlimeWorld deserializeWorld(
+            byte version,
+            SlimeLoader loader,
+            String worldName,
+            DataInputStream dataStream,
+            SlimePropertyMap propertyMap,
+            boolean readOnly
+    ) throws IOException, CorruptedWorldException {
         // World version
         int worldVersion = dataStream.readInt();
         // Chunk Data
@@ -60,11 +59,11 @@ class v10SlimeWorldDeSerializer implements VersionedByteSlimeWorldReader<SlimeWo
         {
             List<CompoundTag> serializedEntities = ((ListTag<CompoundTag>) entitiesCompound.getValue().get("entities")).getValue();
             for (CompoundTag entityCompound : serializedEntities) {
-                ListTag<DoubleTag> listTag = (ListTag<DoubleTag>) entityCompound.getAsListTag("Pos").get();
-
+                ListTag<DoubleTag> listTag = (ListTag<DoubleTag>) entityCompound.getAsListTag("Pos").orElseThrow();
                 int chunkX = listTag.getValue().get(0).getValue().intValue() >> 4;
                 int chunkZ = listTag.getValue().get(2).getValue().intValue() >> 4;
                 long chunkKey = Util.chunkPosition(chunkX, chunkZ);
+
                 SlimeChunk chunk = chunks.get(chunkKey);
                 if (chunk != null) {
                     chunk.getEntities().add(entityCompound);
@@ -78,11 +77,10 @@ class v10SlimeWorldDeSerializer implements VersionedByteSlimeWorldReader<SlimeWo
             int chunkX = ((IntTag) tileEntityCompound.getValue().get("x")).getValue() >> 4;
             int chunkZ = ((IntTag) tileEntityCompound.getValue().get("z")).getValue() >> 4;
             long pos = Util.chunkPosition(chunkX, chunkZ);
-            SlimeChunk chunk = chunks.get(pos);
 
-            if (chunk == null) {
+            SlimeChunk chunk = chunks.get(pos);
+            if (chunk == null)
                 throw new CorruptedWorldException(worldName);
-            }
 
             chunk.getTileEntities().add(tileEntityCompound);
         }
@@ -120,6 +118,7 @@ class v10SlimeWorldDeSerializer implements VersionedByteSlimeWorldReader<SlimeWo
 
             // Height Maps
             byte[] heightMapData = new byte[chunkData.readInt()];
+            //noinspection ResultOfMethodCallIgnored
             chunkData.read(heightMapData);
             com.flowpowered.nbt.CompoundTag heightMaps = readCompound(heightMapData);
 
@@ -135,6 +134,7 @@ class v10SlimeWorldDeSerializer implements VersionedByteSlimeWorldReader<SlimeWo
                     NibbleArray blockLightArray;
                     if (chunkData.readBoolean()) {
                         byte[] blockLightByteArray = new byte[ARRAY_SIZE];
+                        //noinspection ResultOfMethodCallIgnored
                         chunkData.read(blockLightByteArray);
                         blockLightArray = new NibbleArray(blockLightByteArray);
                     } else {
@@ -145,6 +145,7 @@ class v10SlimeWorldDeSerializer implements VersionedByteSlimeWorldReader<SlimeWo
                     NibbleArray skyLightArray;
                     if (chunkData.readBoolean()) {
                         byte[] skyLightByteArray = new byte[ARRAY_SIZE];
+                        //noinspection ResultOfMethodCallIgnored
                         chunkData.read(skyLightByteArray);
                         skyLightArray = new NibbleArray(skyLightByteArray);
                     } else {
@@ -153,11 +154,13 @@ class v10SlimeWorldDeSerializer implements VersionedByteSlimeWorldReader<SlimeWo
 
                     // Block data
                     byte[] blockStateData = new byte[chunkData.readInt()];
+                    //noinspection ResultOfMethodCallIgnored
                     chunkData.read(blockStateData);
                     com.flowpowered.nbt.CompoundTag blockStateTag = readCompound(blockStateData);
 
                     // Biome Data
                     byte[] biomeData = new byte[chunkData.readInt()];
+                    //noinspection ResultOfMethodCallIgnored
                     chunkData.read(biomeData);
                     com.flowpowered.nbt.CompoundTag biomeTag = readCompound(biomeData);
 
@@ -180,9 +183,7 @@ class v10SlimeWorldDeSerializer implements VersionedByteSlimeWorldReader<SlimeWo
     private static int[] toIntArray(byte[] buf) {
         ByteBuffer buffer = ByteBuffer.wrap(buf).order(ByteOrder.BIG_ENDIAN);
         int[] ret = new int[buf.length / 4];
-
         buffer.asIntBuffer().get(ret);
-
         return ret;
     }
 
@@ -192,19 +193,18 @@ class v10SlimeWorldDeSerializer implements VersionedByteSlimeWorldReader<SlimeWo
         byte[] compressed = new byte[compressedLength];
         byte[] normal = new byte[normalLength];
 
+        //noinspection ResultOfMethodCallIgnored
         stream.read(compressed);
         Zstd.decompress(normal, compressed);
         return normal;
     }
 
     private static com.flowpowered.nbt.CompoundTag readCompound(byte[] bytes) throws IOException {
-        if (bytes.length == 0) {
+        if (bytes.length == 0)
             return null;
-        }
 
         NBTInputStream stream = new NBTInputStream(new ByteArrayInputStream(bytes), NBTInputStream.NO_COMPRESSION, ByteOrder.BIG_ENDIAN);
         return (com.flowpowered.nbt.CompoundTag) stream.readTag();
     }
-
 
 }

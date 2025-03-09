@@ -1,16 +1,18 @@
 package com.infernalsuite.aswm.serialization.slime;
 
 import com.flowpowered.nbt.CompoundTag;
-import com.flowpowered.nbt.ListTag;
 import com.infernalsuite.aswm.api.world.SlimeChunk;
 import com.infernalsuite.aswm.api.world.SlimeChunkSection;
 import com.infernalsuite.aswm.api.world.SlimeWorld;
 import com.infernalsuite.aswm.api.world.properties.SlimeProperties;
 import com.infernalsuite.aswm.api.world.properties.SlimePropertyMap;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
 
-public class ChunkPruner {
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+public final class ChunkPruner {
 
     public static boolean canBePruned(SlimeWorld world, SlimeChunk chunk) {
         SlimePropertyMap propertyMap = world.getPropertyMap();
@@ -24,9 +26,8 @@ public class ChunkPruner {
             int chunkX = chunk.getX();
             int chunkZ = chunk.getZ();
 
-            if (chunkX < minX || chunkX > maxX) {
+            if (chunkX < minX || chunkX > maxX)
                 return true;
-            }
 
             if (chunkZ < minZ || chunkZ > maxZ) {
                 return true;
@@ -34,28 +35,23 @@ public class ChunkPruner {
         }
 
         String pruningSetting = world.getPropertyMap().getValue(SlimeProperties.CHUNK_PRUNING);
-        if (pruningSetting.equals("aggressive")) {
+        if (pruningSetting.equals("aggressive"))
             return chunk.getTileEntities().isEmpty() && chunk.getEntities().isEmpty() && areSectionsEmpty(chunk.getSections());
-        }
 
         return false;
     }
 
-    //  TAG_List("palette"): 1 entries of type TAG_Compound
-    //[13:15:06 INFO]:    {
-    //[13:15:06 INFO]:       TAG_Compound: 1 entries
-    //[13:15:06 INFO]:       {
-    //[13:15:06 INFO]:          TAG_String("Name"): minecraft:air
-    //[13:15:06 INFO]:       }
     private static boolean areSectionsEmpty(SlimeChunkSection[] sections) {
         for (SlimeChunkSection chunkSection : sections) {
             try {
                 List<CompoundTag> palettes = chunkSection.getBlockStatesTag().getAsListTag("palette")
-                        .get().getAsCompoundTagList()
-                        .get().getValue();
+                        .orElseThrow().getAsCompoundTagList()
+                        .orElseThrow().getValue();
 
-                if (palettes.size() > 1) return false; // If there is more than one palette, the section is not empty
-                if (!palettes.get(0).getStringValue("Name").get().equals("minecraft:air")) {
+                if (palettes.size() > 1)
+                    return false; // If there is more than one palette, the section is not empty
+
+                if (!palettes.get(0).getStringValue("Name").orElseThrow().equals("minecraft:air")) {
                     return false;
                 }
             } catch (Exception e) {
@@ -68,4 +64,5 @@ public class ChunkPruner {
         // All sections are empty, we can omit this chunk
         return true;
     }
+
 }

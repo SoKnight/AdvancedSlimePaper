@@ -57,13 +57,12 @@ public class FlowPersistentDataContainer implements PersistentDataContainer, Per
         return registry.isInstanceOf(type.getPrimitiveType(), value);
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public <T, Z> @Nullable Z get(@NotNull NamespacedKey key, @NotNull PersistentDataType<T, Z> type) {
         var value = root.getValue().get(key.toString());
-
-        if (value == null) {
+        if (value == null)
             return null;
-        }
 
         return type.fromPrimitive(registry.extract(type.getPrimitiveType(), (Tag<T>) value), getAdapterContext());
     }
@@ -74,6 +73,7 @@ public class FlowPersistentDataContainer implements PersistentDataContainer, Per
         return value == null ? defaultValue : value;
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public @NotNull Set<NamespacedKey> getKeys() {
         var keys = new HashSet<NamespacedKey>();
@@ -99,56 +99,8 @@ public class FlowPersistentDataContainer implements PersistentDataContainer, Per
     }
 
     @Override
-    public void copyTo(@NotNull PersistentDataContainer other, boolean replace) {
-        Preconditions.checkNotNull(other, "The target container cannot be null");
-
-        if (other instanceof FlowPersistentDataContainer otherFlow) {
-            if (replace) {
-                otherFlow.root.setValue(this.root.getValue());
-            } else {
-                otherFlow.root.getValue().forEach((k, v) -> otherFlow.root.getValue().putIfAbsent(k, v));
-            }
-        } else {
-            throw new IllegalStateException("Cannot copy to a container that isn't a FlowPersistentDataContainer");
-        }
-    }
-
-    @Override
     public @NotNull PersistentDataAdapterContext getAdapterContext() {
         return this;
-    }
-
-    @Override
-    public boolean has(@NotNull NamespacedKey key) {
-        return root.getValue().containsKey(key.toString());
-    }
-
-    @Override
-    public byte @NotNull [] serializeToBytes() throws IOException {
-        if (root == null || root.getValue().isEmpty()) {
-            return new byte[0];
-        }
-        ByteArrayOutputStream outByteStream = new ByteArrayOutputStream();
-        NBTOutputStream outStream = new NBTOutputStream(outByteStream, NBTInputStream.NO_COMPRESSION, ByteOrder.BIG_ENDIAN);
-        outStream.writeTag(root);
-
-        return outByteStream.toByteArray();
-    }
-
-    @Override
-    public void readFromBytes(byte @NotNull [] bytes, boolean clear) throws IOException {
-        if (bytes.length == 0) {
-            return;
-        }
-
-        NBTInputStream stream = new NBTInputStream(new ByteArrayInputStream(bytes), NBTInputStream.NO_COMPRESSION, ByteOrder.BIG_ENDIAN);
-        var compound = (com.flowpowered.nbt.CompoundTag) stream.readTag();
-
-        if (clear) {
-            root.getValue().clear();
-        }
-
-        root.getValue().putAll(compound.getValue());
     }
 
     @Override
@@ -171,4 +123,49 @@ public class FlowPersistentDataContainer implements PersistentDataContainer, Per
 
         return Objects.equals(root, flow.root);
     }
+
+    // TODO API from newer versions
+
+    public void copyTo(@NotNull PersistentDataContainer other, boolean replace) {
+        Preconditions.checkNotNull(other, "The target container cannot be null");
+
+        if (other instanceof FlowPersistentDataContainer otherFlow) {
+            if (replace) {
+                otherFlow.root.setValue(this.root.getValue());
+            } else {
+                otherFlow.root.getValue().forEach((k, v) -> otherFlow.root.getValue().putIfAbsent(k, v));
+            }
+        } else {
+            throw new IllegalStateException("Cannot copy to a container that isn't a FlowPersistentDataContainer");
+        }
+    }
+
+    public boolean has(@NotNull NamespacedKey key) {
+        return root.getValue().containsKey(key.toString());
+    }
+
+    public byte @NotNull [] serializeToBytes() throws IOException {
+        if (root == null || root.getValue().isEmpty()) {
+            return new byte[0];
+        }
+        ByteArrayOutputStream outByteStream = new ByteArrayOutputStream();
+        NBTOutputStream outStream = new NBTOutputStream(outByteStream, NBTInputStream.NO_COMPRESSION, ByteOrder.BIG_ENDIAN);
+        outStream.writeTag(root);
+
+        return outByteStream.toByteArray();
+    }
+
+    public void readFromBytes(byte @NotNull [] bytes, boolean clear) throws IOException {
+        if (bytes.length == 0)
+            return;
+
+        NBTInputStream stream = new NBTInputStream(new ByteArrayInputStream(bytes), NBTInputStream.NO_COMPRESSION, ByteOrder.BIG_ENDIAN);
+        var compound = (com.flowpowered.nbt.CompoundTag) stream.readTag();
+
+        if (clear)
+            root.getValue().clear();
+
+        root.getValue().putAll(compound.getValue());
+    }
+
 }

@@ -10,9 +10,13 @@ import com.infernalsuite.aswm.api.world.SlimeWorld;
 
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
+
 import java.util.*;
 
-public class SkeletonCloning {
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+public final class SkeletonCloning {
 
     public static SkeletonSlimeWorld fullClone(String worldName, SlimeWorld world, SlimeLoader loader) {
         return new SkeletonSlimeWorld(worldName,
@@ -21,14 +25,14 @@ public class SkeletonCloning {
                 cloneChunkStorage(world.getChunkStorage()),
                 world.getExtraData().clone(),
                 world.getPropertyMap().clone(),
-                world.getDataVersion());
+                world.getDataVersion()
+        );
     }
 
     public static SkeletonSlimeWorld weakCopy(SlimeWorld world) {
         Long2ObjectMap<SlimeChunk> cloned = new Long2ObjectOpenHashMap<>();
         for (SlimeChunk chunk : world.getChunkStorage()) {
             long pos = Util.chunkPosition(chunk.getX(), chunk.getZ());
-
             cloned.put(pos, chunk);
         }
 
@@ -38,7 +42,8 @@ public class SkeletonCloning {
                 cloned,
                 world.getExtraData().clone(),
                 world.getPropertyMap().clone(),
-                world.getDataVersion());
+                world.getDataVersion()
+        );
     }
 
 
@@ -50,7 +55,8 @@ public class SkeletonCloning {
             SlimeChunkSection[] copied = new SlimeChunkSection[chunk.getSections().length];
             for (int i = 0; i < copied.length; i++) {
                 SlimeChunkSection original = chunk.getSections()[i];
-                if (original == null) continue; // This shouldn't happen, yet it does, not gonna figure out why.
+                if (original == null)
+                    continue; // This shouldn't happen, yet it does, not gonna figure out why.
 
                 NibbleArray blockLight = original.getBlockLight();
                 NibbleArray skyLight = original.getSkyLight();
@@ -63,17 +69,16 @@ public class SkeletonCloning {
                 );
             }
 
-            cloned.put(pos,
-                    new SlimeChunkSkeleton(
-                            chunk.getX(),
-                            chunk.getZ(),
-                            copied,
-                            chunk.getHeightMaps().clone(),
-                            deepClone(chunk.getTileEntities()),
-                            deepClone(chunk.getEntities()),
-                            chunk.getExtraData().clone(),
-                            null
-                    ));
+            cloned.put(pos, new SlimeChunkSkeleton(
+                    chunk.getX(),
+                    chunk.getZ(),
+                    copied,
+                    chunk.getHeightMaps().clone(),
+                    deepClone(chunk.getTileEntities()),
+                    deepClone(chunk.getEntities()),
+                    chunk.getExtraData().clone(),
+                    null
+            ));
         }
 
         return cloned;
@@ -81,10 +86,10 @@ public class SkeletonCloning {
 
     private static List<CompoundTag> deepClone(List<CompoundTag> tags) {
         List<CompoundTag> cloned = new ArrayList<>(tags.size());
-        for (CompoundTag tag : tags) {
+        for (CompoundTag tag : tags)
             cloned.add(tag.clone());
-        }
 
         return cloned;
     }
+
 }

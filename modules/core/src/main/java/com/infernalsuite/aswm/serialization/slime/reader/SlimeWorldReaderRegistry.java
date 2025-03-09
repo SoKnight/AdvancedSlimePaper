@@ -35,21 +35,25 @@ public class SlimeWorldReaderRegistry {
         }
     }
 
-    public static SlimeWorld readWorld(SlimeLoader loader, String worldName, byte[] serializedWorld, SlimePropertyMap propertyMap, boolean readOnly) throws IOException, CorruptedWorldException, NewerFormatException {
+    public static SlimeWorld readWorld(
+            SlimeLoader loader,
+            String worldName,
+            byte[] serializedWorld,
+            SlimePropertyMap propertyMap,
+            boolean readOnly
+    ) throws IOException, CorruptedWorldException, NewerFormatException {
         DataInputStream dataStream = new DataInputStream(new ByteArrayInputStream(serializedWorld));
         byte[] fileHeader = new byte[SlimeFormat.SLIME_HEADER.length];
+        //noinspection ResultOfMethodCallIgnored
         dataStream.read(fileHeader);
 
-        if (!Arrays.equals(SlimeFormat.SLIME_HEADER, fileHeader)) {
+        if (!Arrays.equals(SlimeFormat.SLIME_HEADER, fileHeader))
             throw new CorruptedWorldException(worldName);
-        }
 
         // File version
         byte version = dataStream.readByte();
-
-        if (version > SlimeFormat.SLIME_VERSION) {
+        if (version > SlimeFormat.SLIME_VERSION)
             throw new NewerFormatException(version);
-        }
 
         VersionedByteSlimeWorldReader<SlimeWorld> reader = FORMATS.get(version);
         return reader.deserializeWorld(version, loader, worldName, dataStream, propertyMap, readOnly);

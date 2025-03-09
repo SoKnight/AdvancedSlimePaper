@@ -4,7 +4,7 @@ import com.flowpowered.nbt.*;
 import com.google.common.base.Preconditions;
 import com.google.common.primitives.Primitives;
 import com.infernalsuite.aswm.api.SlimeNMSBridge;
-import net.kyori.adventure.util.Services;
+import com.infernalsuite.aswm.api.util.Services;
 import org.bukkit.persistence.PersistentDataContainer;
 
 import java.util.ArrayList;
@@ -17,6 +17,7 @@ import java.util.function.Function;
 public class FlowDataTypeRegistry {
 
     public static final FlowDataTypeRegistry DEFAULT = new FlowDataTypeRegistry();
+
     private final Map<Class<?>, TagAdapter<?, ?>> adapters = new ConcurrentHashMap<>();
 
     private <T, Z extends Tag<?>> TagAdapter<T, Z> createAdapter(Class<T> primitiveType, Class<Z> nbtBaseType, BiFunction<String, T, Z> builder, Function<Z, T> extractor) {
@@ -39,9 +40,9 @@ public class FlowDataTypeRegistry {
      * @throws IllegalArgumentException if a valid TagAdapter implementation cannot be found for the requested type.
      */
     private <T> TagAdapter<?, ?> createAdapter(Class<T> type) throws IllegalArgumentException {
-        if (!Primitives.isWrapperType(type)) {
-            type = Primitives.wrap(type); //Make sure we will always "switch" over the wrapper types
-        }
+        if (!Primitives.isWrapperType(type))
+            type = Primitives.wrap(type); // Make sure we will always "switch" over the wrapper types
+
         // This would really make use of pattern matching in JDK 21 :(
 
         // Convert Byte to ByteTag
@@ -99,9 +100,8 @@ public class FlowDataTypeRegistry {
             return createAdapter(PersistentDataContainer[].class, ListTag.class, (key, value) -> {
                 var list = new ArrayList<CompoundTag>();
 
-                for (PersistentDataContainer pdc : value) {
+                for (PersistentDataContainer pdc : value)
                     list.add(extractPDCIntoFlowNBT(key, pdc));
-                }
 
                 return new ListTag<>(key, TagType.TAG_COMPOUND, list);
             }, tag -> {
@@ -109,9 +109,8 @@ public class FlowDataTypeRegistry {
                 var list = casted.getValue();
                 var resArr = new PersistentDataContainer[list.size()];
 
-                for (int i = 0; i < list.size(); i++) {
+                for (int i = 0; i < list.size(); i++)
                     resArr[i] = extractFlowNBTIntoPDC(list.get(i));
-                }
 
                 return resArr;
             });
@@ -121,7 +120,7 @@ public class FlowDataTypeRegistry {
     }
 
     private PersistentDataContainer extractFlowNBTIntoPDC(CompoundTag compound) {
-        var optBridge = Services.service(SlimeNMSBridge.class);
+        var optBridge = Services.findService(SlimeNMSBridge.class);
         if (optBridge.isPresent()) {
             var bridge = optBridge.get();
             return bridge.extractCompoundMapIntoCraftPDC(compound.getValue());
@@ -139,7 +138,7 @@ public class FlowDataTypeRegistry {
         if (pdc instanceof FlowPersistentDataContainer container) {
             map.putAll(container.getRoot().getValue());
         } else {
-            Services.service(SlimeNMSBridge.class).orElseThrow().extractCraftPDC(pdc, map);
+            Services.getService(SlimeNMSBridge.class).extractCraftPDC(pdc, map);
         }
 
         return new CompoundTag(key, map);
@@ -156,8 +155,7 @@ public class FlowDataTypeRegistry {
      * @throws IllegalArgumentException if no suitable tag type adapter for this type was found
      */
     public <T> Tag<?> wrap(String key, Class<T> type, T value) throws IllegalArgumentException {
-        return obtainAdapter(type)
-                .build(key, value);
+        return obtainAdapter(type).build(key, value);
     }
 
     /**
@@ -171,8 +169,7 @@ public class FlowDataTypeRegistry {
      *                                  type was found
      */
     public <T> boolean isInstanceOf(Class<T> type, Tag<?> base) {
-        return obtainAdapter(type)
-                .isInstance(base);
+        return obtainAdapter(type).isInstance(base);
     }
 
     /**
@@ -195,8 +192,13 @@ public class FlowDataTypeRegistry {
         return type.cast(foundValue);
     }
 
-    private record TagAdapter<T, Z extends Tag<?>>(Class<T> primitiveType, Class<Z> nbtBaseType,
-                                                   BiFunction<String, T, Z> builder, Function<Z, T> extractor) {
+    private record TagAdapter<T, Z extends Tag<?>>(
+            Class<T> primitiveType,
+            Class<Z> nbtBaseType,
+            BiFunction<String, T, Z> builder,
+            Function<Z, T> extractor
+    ) {
+
         /**
          * This method will extract the value stored in the tag, according to
          * the expected primitive type.
@@ -235,5 +237,7 @@ public class FlowDataTypeRegistry {
         boolean isInstance(Tag<?> base) {
             return this.nbtBaseType.isInstance(base);
         }
+
     }
+
 }

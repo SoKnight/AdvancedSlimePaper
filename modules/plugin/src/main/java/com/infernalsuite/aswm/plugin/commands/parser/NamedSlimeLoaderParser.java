@@ -4,6 +4,7 @@ import com.infernalsuite.aswm.api.loaders.SlimeLoader;
 import com.infernalsuite.aswm.plugin.commands.SlimeCommand;
 import com.infernalsuite.aswm.plugin.commands.exception.MessageCommandException;
 import com.infernalsuite.aswm.plugin.loader.LoaderManager;
+import lombok.AllArgsConstructor;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.command.CommandSender;
@@ -17,24 +18,24 @@ import org.incendo.cloud.suggestion.SuggestionProvider;
 
 import java.util.concurrent.CompletableFuture;
 
-public class NamedSlimeLoaderParser implements ArgumentParser<CommandSender, NamedSlimeLoader> {
+@AllArgsConstructor
+public final class NamedSlimeLoaderParser implements ArgumentParser<CommandSender, NamedSlimeLoader> {
 
     private final LoaderManager loaderManager;
 
-    public NamedSlimeLoaderParser(LoaderManager loaderManager) {
-        this.loaderManager = loaderManager;
-    }
-
     @Override
-    public @NonNull ArgumentParseResult<@NonNull NamedSlimeLoader> parse(@NonNull CommandContext<@NonNull CommandSender> commandContext, @NonNull CommandInput commandInput) {
+    public @NonNull ArgumentParseResult<@NonNull NamedSlimeLoader> parse(
+            @NonNull CommandContext<@NonNull CommandSender> commandContext,
+            @NonNull CommandInput commandInput
+    ) {
         String input = commandInput.peekString();
-        SlimeLoader loader = loaderManager.getLoader(input);
 
-        if (loader == null) {
+        SlimeLoader loader = loaderManager.getLoader(input);
+        if (loader == null)
             return ArgumentParseResult.failure(new MessageCommandException(SlimeCommand.COMMAND_PREFIX.append(
-                    Component.text("Unknown data source " + input + "!").color(NamedTextColor.RED)
+                    Component.text("Unknown data source '%s'!".formatted(input)).color(NamedTextColor.RED)
             )));
-        }
+
         commandInput.readString();
         return ArgumentParseResult.success(new NamedSlimeLoader(input, loader));
     }
@@ -50,4 +51,5 @@ public class NamedSlimeLoaderParser implements ArgumentParser<CommandSender, Nam
                         .toList()
         );
     }
+
 }

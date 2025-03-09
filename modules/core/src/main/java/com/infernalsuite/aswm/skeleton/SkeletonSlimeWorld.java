@@ -17,10 +17,10 @@ import org.jetbrains.annotations.Nullable;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 
 public final class SkeletonSlimeWorld implements SlimeWorld {
+
     private final String name;
     private final @Nullable SlimeLoader loader;
     private final boolean readOnly;
@@ -105,23 +105,18 @@ public final class SkeletonSlimeWorld implements SlimeWorld {
 
     @Override
     public SlimeWorld clone(String worldName, SlimeLoader loader) throws WorldAlreadyExistsException, IOException {
-        if (name.equals(worldName)) {
+        if (name.equals(worldName))
             throw new IllegalArgumentException("The clone world cannot have the same name as the original world!");
-        }
 
-        if (worldName == null) {
+        if (worldName == null)
             throw new IllegalArgumentException("The world name cannot be null!");
-        }
-        if (loader != null) {
-            if (loader.worldExists(worldName)) {
-                throw new WorldAlreadyExistsException(worldName);
-            }
-        }
+
+        if (loader != null && loader.worldExists(worldName))
+            throw new WorldAlreadyExistsException(worldName);
 
         SlimeWorld cloned = SkeletonCloning.fullClone(worldName, this, loader);
-        if (loader != null) {
+        if (loader != null)
             loader.saveWorld(worldName, SlimeSerializer.serialize(cloned));
-        }
 
         return cloned;
     }
@@ -129,7 +124,7 @@ public final class SkeletonSlimeWorld implements SlimeWorld {
     @Override
     public @NotNull PersistentDataContainer getPersistentDataContainer() {
         return this.pdc;
-    };
+    }
 
     public String name() {
         return name;

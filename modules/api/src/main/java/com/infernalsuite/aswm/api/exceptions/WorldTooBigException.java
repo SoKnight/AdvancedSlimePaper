@@ -7,6 +7,7 @@ package com.infernalsuite.aswm.api.exceptions;
 public class WorldTooBigException extends SlimeException {
 
     public WorldTooBigException(String worldName) {
-        super("World " + worldName + " is too big to be converted into the SRF!");
+        super("World '%s' is too big to be converted into the SRF!".formatted(worldName));
     }
+
 }

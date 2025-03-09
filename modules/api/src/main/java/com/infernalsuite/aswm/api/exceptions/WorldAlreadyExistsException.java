@@ -7,6 +7,7 @@ package com.infernalsuite.aswm.api.exceptions;
 public class WorldAlreadyExistsException extends SlimeException {
 
     public WorldAlreadyExistsException(String world) {
-        super("World " + world + " already exists!");
+        super("World '%s' already exists!".formatted(world));
     }
+
 }

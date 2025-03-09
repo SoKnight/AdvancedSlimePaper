@@ -2,61 +2,62 @@ package com.infernalsuite.aswm.plugin.config;
 
 import com.infernalsuite.aswm.plugin.SWPlugin;
 import io.leangen.geantyref.TypeToken;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.spongepowered.configurate.loader.HeaderMode;
 import org.spongepowered.configurate.yaml.NodeStyle;
 import org.spongepowered.configurate.yaml.YamlConfigurationLoader;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
-public class ConfigManager {
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+public final class ConfigManager {
 
-    private static final File PLUGIN_DIR = new File("plugins", "SlimeWorldManager");
-    private static final File WORLDS_FILE = new File(PLUGIN_DIR, "worlds.yml");
-    private static final File SOURCES_FILE = new File(PLUGIN_DIR, "sources.yml");
+    private static final Path PLUGIN_DIR = Paths.get("plugins", "SlimeWorldManager");
+    private static final Path SOURCES_FILE = PLUGIN_DIR.resolve("data-sources.yml");
+    private static final Path WORLDS_FILE = PLUGIN_DIR.resolve("worlds.yml");
 
-    private static WorldsConfig worldConfig;
-    private static YamlConfigurationLoader worldConfigLoader;
+    @Getter private static DataSourcesConfig dataSourcesConfig;
+    @Getter private static WorldsConfig worldConfig;
 
-    private static DatasourcesConfig datasourcesConfig;
+    @Getter(AccessLevel.PACKAGE) private static YamlConfigurationLoader dataSourcesConfigLoader;
+    @Getter(AccessLevel.PACKAGE) private static YamlConfigurationLoader worldConfigLoader;
 
     public static void initialize() throws IOException {
         copyDefaultConfigs();
 
-        worldConfigLoader = YamlConfigurationLoader.builder().file(WORLDS_FILE)
-                .nodeStyle(NodeStyle.BLOCK).headerMode(HeaderMode.PRESERVE).build();
+        dataSourcesConfigLoader= createLoader(SOURCES_FILE);
+        dataSourcesConfig = dataSourcesConfigLoader.load().get(TypeToken.get(DataSourcesConfig.class));
+        dataSourcesConfig.save();
+
+        worldConfigLoader = createLoader(WORLDS_FILE);
         worldConfig = worldConfigLoader.load().get(TypeToken.get(WorldsConfig.class));
-
-        YamlConfigurationLoader datasourcesConfigLoader = YamlConfigurationLoader.builder().file(SOURCES_FILE)
-                .nodeStyle(NodeStyle.BLOCK).headerMode(HeaderMode.PRESERVE).build();
-        datasourcesConfig = datasourcesConfigLoader.load().get(TypeToken.get(DatasourcesConfig.class));
-
         worldConfig.save();
-        datasourcesConfigLoader.save(datasourcesConfigLoader.createNode().set(TypeToken.get(DatasourcesConfig.class), datasourcesConfig));
     }
 
     private static void copyDefaultConfigs() throws IOException {
-        PLUGIN_DIR.mkdirs();
+        if (!Files.isDirectory(PLUGIN_DIR))
+            Files.createDirectories(PLUGIN_DIR);
 
-        if (!WORLDS_FILE.exists()) {
-            Files.copy(SWPlugin.getInstance().getResource("worlds.yml"), WORLDS_FILE.toPath());
+        if (!Files.isRegularFile(SOURCES_FILE)) {
+            Files.copy(SWPlugin.getInstance().getResource("data-sources.yml"), SOURCES_FILE);
         }
 
-        if (!SOURCES_FILE.exists()) {
-            Files.copy(SWPlugin.getInstance().getResource("worlds.yml"), SOURCES_FILE.toPath());
+        if (!Files.isRegularFile(WORLDS_FILE)) {
+            Files.copy(SWPlugin.getInstance().getResource("worlds.yml"), WORLDS_FILE);
         }
     }
-
-    public static DatasourcesConfig getDatasourcesConfig() {
-        return datasourcesConfig;
+    
+    private static YamlConfigurationLoader createLoader(Path path) {
+        return YamlConfigurationLoader.builder()
+                .path(path)
+                .nodeStyle(NodeStyle.BLOCK)
+                .headerMode(HeaderMode.PRESERVE)
+                .build();
     }
 
-    public static WorldsConfig getWorldConfig() {
-        return worldConfig;
-    }
-
-    static YamlConfigurationLoader getWorldConfigLoader() {
-        return worldConfigLoader;
-    }
 }

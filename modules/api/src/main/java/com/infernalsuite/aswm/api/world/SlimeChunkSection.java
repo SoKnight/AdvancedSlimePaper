@@ -18,14 +18,13 @@ public interface SlimeChunkSection {
      *
      * @return A {@link NibbleArray} with the block light data.
      */
-    @Nullable
-    NibbleArray getBlockLight();
+    @Nullable NibbleArray getBlockLight();
 
     /**
      * Returns the sky light data.
      *
      * @return A {@link NibbleArray} containing the sky light data.
      */
-    @Nullable
-    NibbleArray getSkyLight();
+    @Nullable NibbleArray getSkyLight();
+
 }

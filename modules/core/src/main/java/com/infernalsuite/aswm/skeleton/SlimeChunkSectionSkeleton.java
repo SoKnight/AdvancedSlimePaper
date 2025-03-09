@@ -5,7 +5,13 @@ import com.infernalsuite.aswm.api.utils.NibbleArray;
 import com.infernalsuite.aswm.api.world.SlimeChunkSection;
 import org.jetbrains.annotations.Nullable;
 
-public record SlimeChunkSectionSkeleton(CompoundTag blockStates, CompoundTag biome, NibbleArray block, NibbleArray light) implements SlimeChunkSection {
+public record SlimeChunkSectionSkeleton(
+        CompoundTag blockStates,
+        CompoundTag biome,
+        NibbleArray block,
+        NibbleArray light
+) implements SlimeChunkSection {
+
     @Override
     public CompoundTag getBlockStatesTag() {
         return this.blockStates;
@@ -25,4 +31,5 @@ public record SlimeChunkSectionSkeleton(CompoundTag blockStates, CompoundTag bio
     public NibbleArray getSkyLight() {
         return this.light;
     }
+
 }

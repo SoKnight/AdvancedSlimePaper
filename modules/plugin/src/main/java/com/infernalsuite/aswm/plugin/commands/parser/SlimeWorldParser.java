@@ -17,17 +17,21 @@ import org.incendo.cloud.suggestion.SuggestionProvider;
 
 import java.util.concurrent.CompletableFuture;
 
-public class SlimeWorldParser implements ArgumentParser<CommandSender, SlimeWorld> {
-    @Override
-    public @NonNull ArgumentParseResult<@NonNull SlimeWorld> parse(@NonNull CommandContext<@NonNull CommandSender> commandContext, @NonNull CommandInput commandInput) {
-        String input = commandInput.peekString();
-        SlimeWorld loaded = AdvancedSlimePaperAPI.instance().getLoadedWorld(input);
+public final class SlimeWorldParser implements ArgumentParser<CommandSender, SlimeWorld> {
 
-        if (loaded == null) {
+    @Override
+    public @NonNull ArgumentParseResult<@NonNull SlimeWorld> parse(
+            @NonNull CommandContext<@NonNull CommandSender> commandContext,
+            @NonNull CommandInput commandInput
+    ) {
+        String input = commandInput.peekString();
+
+        SlimeWorld loaded = AdvancedSlimePaperAPI.instance().getLoadedWorld(input);
+        if (loaded == null)
             return ArgumentParseResult.failure(new MessageCommandException(SlimeCommand.COMMAND_PREFIX.append(
-                    Component.text("World " + input + " is not loaded!").color(NamedTextColor.RED)
+                    Component.text("World '%s' is not loaded!".formatted(input)).color(NamedTextColor.RED)
             )));
-        }
+
         commandInput.readString();
         return ArgumentParseResult.success(loaded);
     }
@@ -42,4 +46,5 @@ public class SlimeWorldParser implements ArgumentParser<CommandSender, SlimeWorl
                         .toList()
         );
     }
+
 }

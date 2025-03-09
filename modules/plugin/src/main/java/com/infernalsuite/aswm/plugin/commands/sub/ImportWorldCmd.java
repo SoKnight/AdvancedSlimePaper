@@ -16,6 +16,7 @@ import com.infernalsuite.aswm.plugin.config.ConfigManager;
 import com.infernalsuite.aswm.plugin.config.WorldData;
 import com.infernalsuite.aswm.plugin.config.WorldsConfig;
 import com.infernalsuite.aswm.plugin.util.ExecutorUtil;
+import lombok.extern.slf4j.Slf4j;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.command.CommandSender;
@@ -24,8 +25,6 @@ import org.incendo.cloud.annotations.Command;
 import org.incendo.cloud.annotations.CommandDescription;
 import org.incendo.cloud.annotations.Permission;
 import org.incendo.cloud.annotations.injection.RawArgs;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -33,60 +32,58 @@ import java.util.Arrays;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
-public class ImportWorldCmd extends SlimeCommand {
+@Slf4j
+public final class ImportWorldCmd extends SlimeCommand {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ImportWorldCmd.class);
+    private final Cache<String, String[]> importCache;
 
     public ImportWorldCmd(CommandManager commandManager) {
         super(commandManager);
+        this.importCache = CacheBuilder.newBuilder()
+                .expireAfterWrite(30, TimeUnit.SECONDS)
+                .build();
     }
 
-    private final Cache<String, String[]> importCache = CacheBuilder.newBuilder().expireAfterWrite(30, TimeUnit.SECONDS).build();
-
-    @Command("swp|aswm|swm import <path-to-world> <data-source> [new-world-name]")
+    @RawArgs
+    @Command("swm|aswm|swp import <path-to-world> <data-source> [new-world-name]")
     @CommandDescription("Convert a world to the slime format and save it.")
     @Permission("swm.importworld")
-    @RawArgs
-    public CompletableFuture<Void> importWorld(CommandSender sender, String[] args,
-                                               @Argument(value = "path-to-world") String pathToWorld,
-                                               @Argument(value = "data-source") NamedSlimeLoader loader,
-                                               @Argument(value = "new-world-name") String newWorldName) {
+    public CompletableFuture<Void> importWorld(
+            CommandSender sender, String[] args,
+            @Argument(value = "path-to-world") String pathToWorld,
+            @Argument(value = "data-source") NamedSlimeLoader loader,
+            @Argument(value = "new-world-name") String newWorldName
+    ) {
         File worldDir = new File(pathToWorld);
-
-        if (!worldDir.exists() || !worldDir.isDirectory()) {
+        if (!worldDir.exists() || !worldDir.isDirectory())
             throw new MessageCommandException(COMMAND_PREFIX.append(
-                    Component.text("Path " + worldDir.getPath() + " does not point out to a valid world directory.")).color(NamedTextColor.RED)
+                    Component.text("Path '%s' does not point out to a valid world directory.".formatted(worldDir.getPath()))).color(NamedTextColor.RED)
             );
-        }
 
         String[] oldArgs = importCache.getIfPresent(sender.getName());
-
         if (oldArgs != null) {
             importCache.invalidate(sender.getName());
 
             if (Arrays.equals(args, oldArgs)) { // Make sure it's exactly the same command
                 String worldName = newWorldName == null ? worldDir.getName() : newWorldName;
                 sender.sendMessage(COMMAND_PREFIX.append(
-                        Component.text("Importing world " + worldDir.getName() + " into data source " + loader.slimeLoader() + "..."))
+                        Component.text("Importing world '%s' into data source '%s'...".formatted(worldDir.getName(), loader.slimeLoader())))
                 );
 
                 WorldsConfig config = ConfigManager.getWorldConfig();
-
-                if (config.getWorlds().containsKey(worldName)) {
+                if (config.getWorlds().containsKey(worldName))
                     throw new MessageCommandException(COMMAND_PREFIX.append(
-                            Component.text("There is already a world called " + worldName + " inside the worlds config file.")).color(NamedTextColor.RED)
+                            Component.text("There is already a world called '%s' inside the worlds config file.".formatted(worldName))).color(NamedTextColor.RED)
                     );
-                }
 
                 return CompletableFuture.runAsync(() -> {
                     try {
                         long start = System.currentTimeMillis();
-                        SlimeWorld world = asp.readVanillaWorld(worldDir, worldName, loader.slimeLoader());
-                        asp.saveWorld(world);
 
-                        ExecutorUtil.runSyncAndWait(plugin, () -> {
-                            asp.loadWorld(world, true);
-                        });
+                        SlimeWorld world = api.readVanillaWorld(worldDir, worldName, loader.slimeLoader());
+                        api.saveWorld(world);
+
+                        ExecutorUtil.runSyncAndWait(plugin, () -> api.loadWorld(world, true));
 
                         sender.sendMessage(COMMAND_PREFIX.append(
                                 Component.text("World ").color(NamedTextColor.GREEN)
@@ -96,6 +93,7 @@ public class ImportWorldCmd extends SlimeCommand {
 
                         WorldData worldData = new WorldData();
                         StringBuilder spawn = new StringBuilder();
+
                         for (String key : world.getPropertyMap().getProperties().keySet()) {
                             switch (key.toLowerCase()) {
                                 case "spawnx" ->
@@ -121,20 +119,20 @@ public class ImportWorldCmd extends SlimeCommand {
 
                         worldData.setDataSource(loader.name());
                         worldData.setSpawn(spawn.toString().isEmpty() ? "0.5, 255, 0.5" : spawn.toString());
+
                         config.getWorlds().put(worldName, worldData);
                         config.save();
-
                     } catch (WorldAlreadyExistsException ex) {
                         throw new MessageCommandException(COMMAND_PREFIX.append(
-                                Component.text("Data source " + loader + " already contains a world called " + worldName + ".")).color(NamedTextColor.RED)
+                                Component.text("Data source '%s' already contains a world called '%s'.".formatted(loader, worldName))).color(NamedTextColor.RED)
                         );
                     } catch (InvalidWorldException ex) {
                         throw new MessageCommandException(COMMAND_PREFIX.append(
-                                Component.text("Directory " + worldDir.getName() + " does not contain a valid Minecraft world.")).color(NamedTextColor.RED)
+                                Component.text("Directory '%s' does not contain a valid Minecraft world.".formatted(worldDir.getName()))).color(NamedTextColor.RED)
                         );
                     } catch (WorldLoadedException ex) {
                         throw new MessageCommandException(COMMAND_PREFIX.append(
-                                Component.text("World " + worldDir.getName() + " is loaded on this server. Please unload it before importing it.")).color(NamedTextColor.RED)
+                                Component.text("World '%s' is loaded on this server. Please unload it before importing it.".formatted(worldDir.getName()))).color(NamedTextColor.RED)
                         );
                     } catch (WorldTooBigException ex) {
                         throw new MessageCommandException(COMMAND_PREFIX.append(
@@ -142,9 +140,9 @@ public class ImportWorldCmd extends SlimeCommand {
                                                " The world you provided just breaks everything. Please, trim it by using the MCEdit tool and try again.")).color(NamedTextColor.RED)
                         );
                     } catch (IOException ex) {
-                        LOGGER.error("Failed to import world {}:", worldDir.getName(), ex);
+                        log.error("Failed to import world '{}':", worldDir.getName(), ex);
                         throw new MessageCommandException(COMMAND_PREFIX.append(
-                                Component.text("Failed to import world " + worldName + ". Take a look at the server console for more information.")).color(NamedTextColor.RED)
+                                Component.text("Failed to import world '%s'. Take a look at the server console for more information.".formatted(worldName))).color(NamedTextColor.RED)
                         );
                     }
 

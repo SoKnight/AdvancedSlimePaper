@@ -4,12 +4,12 @@ import com.flowpowered.nbt.CompoundMap;
 import com.flowpowered.nbt.CompoundTag;
 import com.infernalsuite.aswm.api.world.SlimeWorld;
 import com.infernalsuite.aswm.api.world.SlimeWorldInstance;
-import net.kyori.adventure.util.Services;
 import org.bukkit.World;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.io.IOException;
+import java.util.ServiceLoader;
 
 @ApiStatus.Internal
 public interface SlimeNMSBridge {
@@ -42,7 +42,12 @@ public interface SlimeNMSBridge {
 
     @ApiStatus.Internal
     class Holder {
-        private static final SlimeNMSBridge INSTANCE = Services.service(SlimeNMSBridge.class).orElseThrow();
+
+        private static final SlimeNMSBridge INSTANCE = ServiceLoader.load(
+                SlimeNMSBridge.class,
+                SlimeNMSBridge.class.getClassLoader()
+        ).findFirst().orElseThrow(() -> new IllegalStateException("There is no Slime NMS Bridge service provider found!"));
+
     }
 
     CompoundTag convertChunkTo1_13(CompoundTag tag);

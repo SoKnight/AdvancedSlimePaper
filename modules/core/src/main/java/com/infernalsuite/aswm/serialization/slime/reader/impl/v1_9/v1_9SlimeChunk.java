@@ -5,6 +5,7 @@ import com.flowpowered.nbt.CompoundTag;
 import java.util.List;
 
 public final class v1_9SlimeChunk {
+
     public final String worldName;
     public final int x;
     public final int z;
@@ -18,16 +19,16 @@ public final class v1_9SlimeChunk {
     // Used for 1.13 world upgrading
     public CompoundTag upgradeData;
 
-    v1_9SlimeChunk(String worldName,
-                   int x,
-                   int z,
-                   v1_9SlimeChunkSection[] sections,
-                   int minY,
-                   int maxY,
-                   CompoundTag heightMap,
-                   int[] biomes,
-                   List<CompoundTag> tileEntities,
-                   List<CompoundTag> entities) {
+    v1_9SlimeChunk(
+            String worldName,
+            int x, int z,
+            v1_9SlimeChunkSection[] sections,
+            int minY, int maxY,
+            CompoundTag heightMap,
+            int[] biomes,
+            List<CompoundTag> tileEntities,
+            List<CompoundTag> entities
+    ) {
         this.worldName = worldName;
         this.x = x;
         this.z = z;

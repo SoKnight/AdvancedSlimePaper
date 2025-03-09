@@ -10,13 +10,13 @@ import org.bukkit.command.CommandSender;
 import org.incendo.cloud.annotations.Command;
 import org.incendo.cloud.annotations.CommandDescription;
 
-public class VersionCmd extends SlimeCommand {
+public final class VersionCmd extends SlimeCommand {
 
     public VersionCmd(CommandManager commandManager) {
         super(commandManager);
     }
 
-    @Command("swp|aswm|swm version")
+    @Command("swm|aswm|swp version")
     @CommandDescription("Shows the plugin version.")
     public void showVersion(CommandSender sender) {
         sender.sendMessage(COMMAND_PREFIX.append(
@@ -27,4 +27,5 @@ public class VersionCmd extends SlimeCommand {
                         .append(Component.text(".").color(NamedTextColor.GRAY))
         ));
     }
+
 }

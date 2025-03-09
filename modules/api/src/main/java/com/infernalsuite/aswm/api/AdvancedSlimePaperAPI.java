@@ -1,10 +1,9 @@
 package com.infernalsuite.aswm.api;
 
 import com.infernalsuite.aswm.api.exceptions.*;
+import com.infernalsuite.aswm.api.loaders.SlimeLoader;
 import com.infernalsuite.aswm.api.world.SlimeWorld;
 import com.infernalsuite.aswm.api.world.properties.SlimePropertyMap;
-import com.infernalsuite.aswm.api.loaders.SlimeLoader;
-import net.kyori.adventure.util.Services;
 import org.bukkit.World;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
@@ -12,6 +11,7 @@ import org.jetbrains.annotations.Nullable;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.util.ServiceLoader;
 
 /**
  * Main class of the SWM API. From here, you can load
@@ -35,8 +35,12 @@ public interface AdvancedSlimePaperAPI {
      * @throws CorruptedWorldException if the world retrieved cannot be parsed into a {@link SlimeWorld} object.
      * @throws NewerFormatException    if the world uses a newer version of the SRF.
      */
-    SlimeWorld readWorld(SlimeLoader loader, String worldName, boolean readOnly, SlimePropertyMap propertyMap) throws
-            UnknownWorldException, IOException, CorruptedWorldException, NewerFormatException;
+    SlimeWorld readWorld(
+            SlimeLoader loader,
+            String worldName,
+            boolean readOnly,
+            SlimePropertyMap propertyMap
+    ) throws UnknownWorldException, IOException, CorruptedWorldException, NewerFormatException;
 
     /**
      * Gets a world which has already been loaded by ASWM.
@@ -137,6 +141,12 @@ public interface AdvancedSlimePaperAPI {
 
     @ApiStatus.Internal
     class Holder {
-        private static final AdvancedSlimePaperAPI INSTANCE = Services.service(AdvancedSlimePaperAPI.class).orElseThrow();
+
+        private static final AdvancedSlimePaperAPI INSTANCE = ServiceLoader.load(
+                AdvancedSlimePaperAPI.class,
+                AdvancedSlimePaperAPI.class.getClassLoader()
+        ).findFirst().orElseThrow(() -> new IllegalStateException("There is no ASP API service provider found!"));
+
     }
+
 }

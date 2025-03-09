@@ -1,15 +1,11 @@
 package com.infernalsuite.aswm.api.exceptions;
 
+import lombok.experimental.StandardException;
+
 /**
  * Generic SWM exception.
  */
+@StandardException
 public class SlimeException extends Exception {
 
-    public SlimeException(String message) {
-        super(message);
-    }
-
-    public SlimeException(String message, Exception ex) {
-        super(message, ex);
-    }
 }

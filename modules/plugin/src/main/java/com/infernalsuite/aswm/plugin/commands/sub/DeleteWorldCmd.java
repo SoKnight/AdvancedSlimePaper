@@ -40,36 +40,32 @@ public class DeleteWorldCmd extends SlimeCommand {
 
     private final Cache<String, String[]> deleteCache = CacheBuilder.newBuilder().expireAfterWrite(30, TimeUnit.SECONDS).build();
 
-    @Command("swp|aswm|swm delete <world> [data-source]")
+    @RawArgs
+    @Command("swm|aswm|swp delete <world> [data-source]")
     @CommandDescription("Delete a world")
     @Permission("swm.deleteworld")
-    @RawArgs
-    public CompletableFuture<Void> deleteWorld(CommandSender sender, String[] args,
-                                               @Argument(value = "world", suggestions = "known-slime-worlds") String worldName,
-                                               @Argument(value = "data-source") @Nullable NamedSlimeLoader dataSource) {
+    public CompletableFuture<Void> deleteWorld(
+            CommandSender sender, String[] args,
+            @Argument(value = "world", suggestions = "known-slime-worlds") String worldName,
+            @Argument(value = "data-source") @Nullable NamedSlimeLoader dataSource
+    ) {
         World world = Bukkit.getWorld(worldName);
-
-        if (world != null) {
+        if (world != null)
             throw new MessageCommandException(COMMAND_PREFIX.append(
-                    Component.text("World " + worldName + " is loaded on this server! Unload it by running the command ").color(NamedTextColor.RED)
+                    Component.text("World '%s' is loaded on this server! Unload it by running the command ".formatted(worldName)).color(NamedTextColor.RED)
                             .append(Component.text("/swm unload " + worldName).color(NamedTextColor.GRAY))
                             .append(Component.text(".")).color(NamedTextColor.RED)
             ));
-        }
 
         SlimeLoader loader;
-
         if (dataSource != null) {
             loader = dataSource.slimeLoader();
         } else {
-            WorldsConfig config = ConfigManager.getWorldConfig();
-            WorldData worldData = config.getWorlds().get(worldName);
-
-            if (worldData == null) {
+            WorldData worldData = ConfigManager.getWorldConfig().getWorlds().get(worldName);
+            if (worldData == null)
                 throw new MessageCommandException(COMMAND_PREFIX.append(
-                        Component.text("Failed to find world " + worldName + " inside the worlds config file!").color(NamedTextColor.RED)
+                        Component.text("Failed to find world '%s' inside the worlds config file!".formatted(worldName)).color(NamedTextColor.RED)
                 ));
-            }
 
             loader = plugin.getLoaderManager().getLoader(worldData.getDataSource());
         }

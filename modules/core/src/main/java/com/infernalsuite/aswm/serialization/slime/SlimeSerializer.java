@@ -12,8 +12,7 @@ import com.infernalsuite.aswm.api.world.SlimeChunk;
 import com.infernalsuite.aswm.api.world.SlimeChunkSection;
 import com.infernalsuite.aswm.api.world.SlimeWorld;
 import com.infernalsuite.aswm.api.world.properties.SlimePropertyMap;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
@@ -21,9 +20,8 @@ import java.io.IOException;
 import java.nio.ByteOrder;
 import java.util.*;
 
+@Slf4j
 public class SlimeSerializer {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(SlimeSerializer.class);
 
     public static byte[] serialize(SlimeWorld world) {
         CompoundTag extraData = world.getExtraData();
@@ -69,7 +67,6 @@ public class SlimeSerializer {
             throw new RuntimeException(e);
         }
 
-
         return outByteStream.toByteArray();
     }
 
@@ -95,18 +92,14 @@ public class SlimeSerializer {
                 // Block Light
                 boolean hasBlockLight = slimeChunkSection.getBlockLight() != null;
                 outStream.writeBoolean(hasBlockLight);
-
-                if (hasBlockLight) {
+                if (hasBlockLight)
                     outStream.write(slimeChunkSection.getBlockLight().getBacking());
-                }
 
                 // Sky Light
                 boolean hasSkyLight = slimeChunkSection.getSkyLight() != null;
                 outStream.writeBoolean(hasSkyLight);
-
-                if (hasSkyLight) {
+                if (hasSkyLight)
                     outStream.write(slimeChunkSection.getSkyLight().getBacking());
-                }
 
                 // Block Data
                 byte[] serializedBlockStates = serializeCompoundTag(slimeChunkSection.getBlockStatesTag());
@@ -141,11 +134,10 @@ public class SlimeSerializer {
 
             // Extra Tag
             {
-                if (chunk.getExtraData() == null) {
-                    LOGGER.warn("Chunk at " + chunk.getX() + ", " + chunk.getZ() + " from world " + world.getName() + " has no extra data! When deserialized, this chunk will have an empty extra data tag!");
-                }
-                byte[] extra = serializeCompoundTag(chunk.getExtraData());
+                if (chunk.getExtraData() == null)
+                    log.warn("Chunk at ({},{}) from world {} has no extra data! When deserialized, this chunk will have an empty extra data tag!", chunk.getX(), chunk.getZ(), world.getName());
 
+                byte[] extra = serializeCompoundTag(chunk.getExtraData());
                 outStream.writeInt(extra.length);
                 outStream.write(extra);
             }
@@ -155,13 +147,12 @@ public class SlimeSerializer {
     }
 
     protected static byte[] serializeCompoundTag(CompoundTag tag) throws IOException {
-        if (tag == null || tag.getValue().isEmpty()) {
+        if (tag == null || tag.getValue().isEmpty())
             return new byte[0];
-        }
+
         ByteArrayOutputStream outByteStream = new ByteArrayOutputStream();
         NBTOutputStream outStream = new NBTOutputStream(outByteStream, NBTInputStream.NO_COMPRESSION, ByteOrder.BIG_ENDIAN);
         outStream.writeTag(tag);
-
         return outByteStream.toByteArray();
     }
 

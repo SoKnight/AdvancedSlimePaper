@@ -7,6 +7,7 @@ package com.infernalsuite.aswm.api.exceptions;
 public class UnknownWorldException extends SlimeException {
 
     public UnknownWorldException(String world) {
-        super("Unknown world " + world);
+        super("Unknown world '%s'!".formatted(world));
     }
+
 }
