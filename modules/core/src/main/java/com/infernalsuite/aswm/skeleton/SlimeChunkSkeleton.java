@@ -1,19 +1,19 @@
 package com.infernalsuite.aswm.skeleton;
 
-import com.flowpowered.nbt.CompoundTag;
 import com.infernalsuite.aswm.api.world.SlimeChunk;
 import com.infernalsuite.aswm.api.world.SlimeChunkSection;
+import net.kyori.adventure.nbt.CompoundBinaryTag;
 
 import java.util.List;
 
 public record SlimeChunkSkeleton(
         int x, int z,
         SlimeChunkSection[] sections,
-        CompoundTag heightMap,
-        List<CompoundTag> blockEntities,
-        List<CompoundTag> entities,
-        CompoundTag extra,
-        CompoundTag upgradeData
+        CompoundBinaryTag heightMap,
+        List<CompoundBinaryTag> blockEntities,
+        List<CompoundBinaryTag> entities,
+        CompoundBinaryTag extra,
+        CompoundBinaryTag upgradeData
 ) implements SlimeChunk {
 
     @Override
@@ -32,27 +32,27 @@ public record SlimeChunkSkeleton(
     }
 
     @Override
-    public CompoundTag getHeightMaps() {
+    public CompoundBinaryTag getHeightMaps() {
         return this.heightMap;
     }
 
     @Override
-    public List<CompoundTag> getTileEntities() {
+    public List<CompoundBinaryTag> getTileEntities() {
         return this.blockEntities;
     }
 
     @Override
-    public List<CompoundTag> getEntities() {
+    public List<CompoundBinaryTag> getEntities() {
         return this.entities;
     }
 
     @Override
-    public CompoundTag getExtraData() {
+    public CompoundBinaryTag getExtraData() {
         return this.extra;
     }
 
     @Override
-    public CompoundTag getUpgradeData() {
+    public CompoundBinaryTag getUpgradeData() {
         return this.upgradeData;
     }
 

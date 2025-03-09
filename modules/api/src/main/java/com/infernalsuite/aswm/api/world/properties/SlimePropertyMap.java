@@ -1,21 +1,26 @@
 package com.infernalsuite.aswm.api.world.properties;
 
-import com.flowpowered.nbt.CompoundMap;
-import com.flowpowered.nbt.CompoundTag;
+import lombok.Getter;
+import net.kyori.adventure.nbt.BinaryTag;
+import net.kyori.adventure.nbt.CompoundBinaryTag;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * A Property Map object.
  */
+@Getter
 public class SlimePropertyMap {
 
-    private final CompoundMap properties;
-
-    public SlimePropertyMap(CompoundMap compoundMap) {
-        this.properties = compoundMap;
-    }
+    private final Map<String, BinaryTag> properties;
 
     public SlimePropertyMap() {
-        this(new CompoundMap());
+        this(new HashMap<>());
+    }
+
+    public SlimePropertyMap(Map<String, BinaryTag> compoundMap) {
+        this.properties = compoundMap;
     }
 
     /**
@@ -24,21 +29,12 @@ public class SlimePropertyMap {
      * @param property The slime property
      * @return The current value
      */
-    public <T> T getValue(SlimeProperty<T> property) {
-        if (properties.containsKey(property.getNbtName())) {
-            return property.readValue(properties.get(property.getNbtName()));
+    public <T, Z extends BinaryTag> T getValue(SlimeProperty<T, Z> property) {
+        if (properties.containsKey(property.getKey())) {
+            return property.readValue(property.cast(properties.get(property.getKey())));
         } else {
             return property.getDefaultValue();
         }
-    }
-
-    /**
-     * Return the properties (CompoundMap)
-     *
-     * @return The properties
-     */
-    public CompoundMap getProperties() {
-        return this.properties;
     }
 
     /**
@@ -48,12 +44,11 @@ public class SlimePropertyMap {
      * @param value    The new value
      * @throws IllegalArgumentException if the value fails validation.
      */
-    public <T> void setValue(SlimeProperty<T> property, T value) {
-        if (property.getValidator() != null && !property.getValidator().apply(value)) {
-            throw new IllegalArgumentException("'" + value + "' is not a valid property value.");
-        }
+    public <T, Z extends BinaryTag> void setValue(SlimeProperty<T, Z> property, T value) {
+        if (!property.applyValidator(value))
+            throw new IllegalArgumentException("'%s' is not a valid property value.".formatted(value));
 
-        property.writeValue(properties, value);
+        this.properties.put(property.getKey(), property.createTag(value));
     }
 
     /**
@@ -68,24 +63,28 @@ public class SlimePropertyMap {
     }
 
     /**
-     * Returns a {@link CompoundTag} containing every property set in this map.
+     * Returns a {@link CompoundBinaryTag} containing every property set in this map.
      *
-     * @return A {@link CompoundTag} with all the properties stored in this map.
+     * @return A {@link CompoundBinaryTag} with all the properties stored in this map.
      */
-    public CompoundTag toCompound() {
-        return new CompoundTag("properties", properties);
+    public CompoundBinaryTag toCompound() {
+        return CompoundBinaryTag.builder().put(properties).build();
     }
 
-    public static SlimePropertyMap fromCompound(CompoundTag compound) {
-        return new SlimePropertyMap(compound.getValue());
+    public static SlimePropertyMap fromCompound(CompoundBinaryTag tag) {
+        Map<String, BinaryTag> tags = new HashMap<>(tag.size());
+        tag.forEach(entry -> tags.put(entry.getKey(), entry.getValue()));
+        return new SlimePropertyMap(tags);
     }
 
+    @SuppressWarnings("MethodDoesntCallSuperMethod")
     public SlimePropertyMap clone() {
-        return new SlimePropertyMap(new CompoundMap(this.properties));
+        return new SlimePropertyMap(new HashMap<>(this.properties));
     }
 
     @Override
     public String toString() {
         return "SlimePropertyMap" + properties;
     }
+
 }

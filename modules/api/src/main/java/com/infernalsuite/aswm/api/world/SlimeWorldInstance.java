@@ -1,9 +1,11 @@
 package com.infernalsuite.aswm.api.world;
 
-import com.flowpowered.nbt.CompoundTag;
-import com.infernalsuite.aswm.api.world.properties.SlimePropertyMap;
 import com.infernalsuite.aswm.api.loaders.SlimeLoader;
+import com.infernalsuite.aswm.api.world.properties.SlimePropertyMap;
+import net.kyori.adventure.nbt.BinaryTag;
 import org.bukkit.World;
+
+import java.util.concurrent.ConcurrentMap;
 
 public interface SlimeWorldInstance {
 
@@ -19,6 +21,6 @@ public interface SlimeWorldInstance {
 
     SlimeLoader getLoader();
 
-    CompoundTag getExtraData();
+    ConcurrentMap<String, BinaryTag> getExtraData();
 
 }

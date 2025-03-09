@@ -1,6 +1,5 @@
 package com.infernalsuite.aswm.serialization.slime;
 
-import com.flowpowered.nbt.CompoundTag;
 import com.infernalsuite.aswm.api.world.SlimeChunk;
 import com.infernalsuite.aswm.api.world.SlimeChunkSection;
 import com.infernalsuite.aswm.api.world.SlimeWorld;
@@ -8,6 +7,9 @@ import com.infernalsuite.aswm.api.world.properties.SlimeProperties;
 import com.infernalsuite.aswm.api.world.properties.SlimePropertyMap;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
+import net.kyori.adventure.nbt.BinaryTagTypes;
+import net.kyori.adventure.nbt.CompoundBinaryTag;
+import net.kyori.adventure.nbt.ListBinaryTag;
 
 import java.util.List;
 
@@ -44,23 +46,20 @@ public final class ChunkPruner {
     private static boolean areSectionsEmpty(SlimeChunkSection[] sections) {
         for (SlimeChunkSection chunkSection : sections) {
             try {
-                List<CompoundTag> palettes = chunkSection.getBlockStatesTag().getAsListTag("palette")
-                        .orElseThrow().getAsCompoundTagList()
-                        .orElseThrow().getValue();
+                ListBinaryTag paletteTag = chunkSection.getBlockStatesTag().getList("palette");
+                if (paletteTag.elementType() != BinaryTagTypes.COMPOUND)
+                    continue; // If the element type isn't a compound tag, consider the section empty
 
-                if (palettes.size() > 1)
+                List<CompoundBinaryTag> palette = paletteTag.stream().map(tag -> (CompoundBinaryTag) tag).toList();
+                if (palette.size() > 1)
                     return false; // If there is more than one palette, the section is not empty
-
-                if (!palettes.get(0).getStringValue("Name").orElseThrow().equals("minecraft:air")) {
-                    return false;
-                }
-            } catch (Exception e) {
+                if (palette.get(0).getString("Name").equals("minecraft:air"))
+                    return false; // If the only palette entry is not air, the section is not empty
+            } catch (final Exception e) {
                 return false;
             }
-
             // The section is empty, continue to the next one
         }
-
         // All sections are empty, we can omit this chunk
         return true;
     }

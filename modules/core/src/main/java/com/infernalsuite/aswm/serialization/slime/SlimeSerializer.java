@@ -1,11 +1,5 @@
 package com.infernalsuite.aswm.serialization.slime;
 
-import com.flowpowered.nbt.CompoundMap;
-import com.flowpowered.nbt.CompoundTag;
-import com.flowpowered.nbt.ListTag;
-import com.flowpowered.nbt.TagType;
-import com.flowpowered.nbt.stream.NBTInputStream;
-import com.flowpowered.nbt.stream.NBTOutputStream;
 import com.github.luben.zstd.Zstd;
 import com.infernalsuite.aswm.api.utils.SlimeFormat;
 import com.infernalsuite.aswm.api.world.SlimeChunk;
@@ -13,25 +7,25 @@ import com.infernalsuite.aswm.api.world.SlimeChunkSection;
 import com.infernalsuite.aswm.api.world.SlimeWorld;
 import com.infernalsuite.aswm.api.world.properties.SlimePropertyMap;
 import lombok.extern.slf4j.Slf4j;
+import net.kyori.adventure.nbt.*;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.nio.ByteOrder;
 import java.util.*;
 
 @Slf4j
 public class SlimeSerializer {
 
     public static byte[] serialize(SlimeWorld world) {
-        CompoundTag extraData = world.getExtraData();
+        Map<String, BinaryTag> extraData = world.getExtraData();
         SlimePropertyMap propertyMap = world.getPropertyMap();
 
         // Store world properties
-        if (!extraData.getValue().containsKey("properties")) {
-            extraData.getValue().putIfAbsent("properties", propertyMap.toCompound());
+        if (!extraData.containsKey("properties")) {
+            extraData.putIfAbsent("properties", propertyMap.toCompound());
         } else {
-            extraData.getValue().replace("properties", propertyMap.toCompound());
+            extraData.replace("properties", propertyMap.toCompound());
         }
 
         ByteArrayOutputStream outByteStream = new ByteArrayOutputStream();
@@ -54,15 +48,12 @@ public class SlimeSerializer {
             outStream.write(compressedChunkData);
             
             // Extra Tag
-            {
-                byte[] extra = serializeCompoundTag(extraData);
-                byte[] compressedExtra = Zstd.compress(extra);
+            byte[] extra = serializeCompoundTag(CompoundBinaryTag.builder().put(extraData).build());
+            byte[] compressedExtra = Zstd.compress(extra);
 
-                outStream.writeInt(compressedExtra.length);
-                outStream.writeInt(extra.length);
-                outStream.write(compressedExtra);
-            }
-
+            outStream.writeInt(compressedExtra.length);
+            outStream.writeInt(extra.length);
+            outStream.write(compressedExtra);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -117,43 +108,48 @@ public class SlimeSerializer {
             outStream.write(heightMaps);
 
             // Tile entities
-            ListTag<CompoundTag> tileEntitiesNbtList = new ListTag<>("tileEntities", TagType.TAG_COMPOUND, chunk.getTileEntities());
-            CompoundTag tileEntitiesCompound = new CompoundTag("", new CompoundMap(Collections.singletonList(tileEntitiesNbtList)));
+            ListBinaryTag tileEntitiesNbtList = ListBinaryTag.listBinaryTag(BinaryTagTypes.COMPOUND, yayGenerics(chunk.getTileEntities()));
+            CompoundBinaryTag tileEntitiesCompound = CompoundBinaryTag.builder().put("tileEntities", tileEntitiesNbtList).build();
             byte[] tileEntitiesData = serializeCompoundTag(tileEntitiesCompound);
 
             outStream.writeInt(tileEntitiesData.length);
             outStream.write(tileEntitiesData);
 
             // Entities
-            ListTag<CompoundTag> entitiesNbtList = new ListTag<>("entities", TagType.TAG_COMPOUND, chunk.getEntities());
-            CompoundTag entitiesCompound = new CompoundTag("", new CompoundMap(Collections.singletonList(entitiesNbtList)));
+            ListBinaryTag entitiesNbtList = ListBinaryTag.listBinaryTag(BinaryTagTypes.COMPOUND, yayGenerics(chunk.getEntities()));
+            CompoundBinaryTag entitiesCompound = CompoundBinaryTag.builder().put("entities", entitiesNbtList).build();
             byte[] entitiesData = serializeCompoundTag(entitiesCompound);
 
             outStream.writeInt(entitiesData.length);
             outStream.write(entitiesData);
 
             // Extra Tag
-            {
-                if (chunk.getExtraData() == null)
-                    log.warn("Chunk at ({},{}) from world {} has no extra data! When deserialized, this chunk will have an empty extra data tag!", chunk.getX(), chunk.getZ(), world.getName());
+            if (chunk.getExtraData() == null)
+                log.warn(
+                        "Chunk at ({},{}) from world '{}' has no extra data! When deserialized, this chunk will have an empty extra data tag!",
+                        chunk.getX(), chunk.getZ(), world.getName()
+                );
 
-                byte[] extra = serializeCompoundTag(chunk.getExtraData());
-                outStream.writeInt(extra.length);
-                outStream.write(extra);
-            }
+            byte[] extra = serializeCompoundTag(chunk.getExtraData());
+            outStream.writeInt(extra.length);
+            outStream.write(extra);
         }
 
         return outByteStream.toByteArray();
     }
 
-    protected static byte[] serializeCompoundTag(CompoundTag tag) throws IOException {
-        if (tag == null || tag.getValue().isEmpty())
-            return new byte[0];
+    protected static byte[] serializeCompoundTag(CompoundBinaryTag tag) throws IOException {
+        if (tag == null || tag.size() == 0) return new byte[0];
 
         ByteArrayOutputStream outByteStream = new ByteArrayOutputStream();
-        NBTOutputStream outStream = new NBTOutputStream(outByteStream, NBTInputStream.NO_COMPRESSION, ByteOrder.BIG_ENDIAN);
-        outStream.writeTag(tag);
+        BinaryTagIO.writer().write(tag, outByteStream);
+
         return outByteStream.toByteArray();
+    }
+
+    @SuppressWarnings("unchecked")
+    private static List<BinaryTag> yayGenerics(final List<? extends BinaryTag> tags) {
+        return (List<BinaryTag>) tags;
     }
 
 }

@@ -1,15 +1,16 @@
 package com.infernalsuite.aswm.skeleton;
 
-import com.flowpowered.nbt.CompoundTag;
 import com.infernalsuite.aswm.Util;
 import com.infernalsuite.aswm.api.exceptions.WorldAlreadyExistsException;
 import com.infernalsuite.aswm.api.loaders.SlimeLoader;
 import com.infernalsuite.aswm.api.world.SlimeChunk;
 import com.infernalsuite.aswm.api.world.SlimeWorld;
 import com.infernalsuite.aswm.api.world.properties.SlimePropertyMap;
-import com.infernalsuite.aswm.pdc.FlowPersistentDataContainer;
+import com.infernalsuite.aswm.pdc.AdventurePersistentDataContainer;
 import com.infernalsuite.aswm.serialization.slime.SlimeSerializer;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
+import net.kyori.adventure.nbt.BinaryTag;
+import net.kyori.adventure.nbt.CompoundBinaryTag;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -18,6 +19,7 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.ConcurrentMap;
 
 public final class SkeletonSlimeWorld implements SlimeWorld {
 
@@ -25,17 +27,17 @@ public final class SkeletonSlimeWorld implements SlimeWorld {
     private final @Nullable SlimeLoader loader;
     private final boolean readOnly;
     private final Long2ObjectMap<SlimeChunk> chunkStorage;
-    private final CompoundTag extraSerialized;
+    private final ConcurrentMap<String, BinaryTag> extraSerialized;
     private final SlimePropertyMap slimePropertyMap;
     private final int dataVersion;
-    private final FlowPersistentDataContainer pdc;
+    private final AdventurePersistentDataContainer pdc;
 
     public SkeletonSlimeWorld(
             String name,
             @Nullable SlimeLoader loader,
             boolean readOnly,
             Long2ObjectMap<SlimeChunk> chunkStorage,
-            CompoundTag extraSerialized,
+            ConcurrentMap<String, BinaryTag> extraSerialized,
             SlimePropertyMap slimePropertyMap,
             int dataVersion
     ) {
@@ -46,7 +48,7 @@ public final class SkeletonSlimeWorld implements SlimeWorld {
         this.extraSerialized = extraSerialized;
         this.slimePropertyMap = slimePropertyMap;
         this.dataVersion = dataVersion;
-        this.pdc = new FlowPersistentDataContainer(extraSerialized);
+        this.pdc = new AdventurePersistentDataContainer(extraSerialized);
     }
 
     @Override
@@ -70,12 +72,12 @@ public final class SkeletonSlimeWorld implements SlimeWorld {
     }
 
     @Override
-    public CompoundTag getExtraData() {
+    public ConcurrentMap<String, BinaryTag> getExtraData() {
         return this.extraSerialized;
     }
 
     @Override
-    public Collection<CompoundTag> getWorldMaps() {
+    public Collection<CompoundBinaryTag> getWorldMaps() {
         return List.of();
     }
 
@@ -142,7 +144,7 @@ public final class SkeletonSlimeWorld implements SlimeWorld {
         return chunkStorage;
     }
 
-    public CompoundTag extraSerialized() {
+    public ConcurrentMap<String, BinaryTag> extraSerialized() {
         return extraSerialized;
     }
 
