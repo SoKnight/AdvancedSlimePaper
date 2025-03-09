@@ -9,7 +9,7 @@ import org.jetbrains.annotations.NotNull;
  * Source: https://github.com/Minikloon/CraftyWorld/blob/master/crafty-common/src/main/kotlin/world/crafty/common/utils/NibbleArray.kt
  */
 @Getter
-public class NibbleArray {
+public final class NibbleArray {
 
     private final byte[] backing;
 

@@ -1,9 +1,13 @@
 package com.infernalsuite.aswm.api.utils;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
+
 /**
  * Class containing some standards of the SRF.
  */
-public class SlimeFormat {
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+public final class SlimeFormat {
 
     /** First bytes of every SRF file **/
     public static final byte[] SLIME_HEADER = new byte[] { -79, 11 };

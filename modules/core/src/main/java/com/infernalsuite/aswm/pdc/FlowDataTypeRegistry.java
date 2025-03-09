@@ -4,7 +4,7 @@ import com.flowpowered.nbt.*;
 import com.google.common.base.Preconditions;
 import com.google.common.primitives.Primitives;
 import com.infernalsuite.aswm.api.SlimeNMSBridge;
-import com.infernalsuite.aswm.api.util.Services;
+import com.infernalsuite.aswm.api.utils.Services;
 import org.bukkit.persistence.PersistentDataContainer;
 
 import java.util.ArrayList;

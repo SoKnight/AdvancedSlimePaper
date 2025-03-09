@@ -1,4 +1,4 @@
-package com.infernalsuite.aswm.api.util;
+package com.infernalsuite.aswm.api.utils;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
