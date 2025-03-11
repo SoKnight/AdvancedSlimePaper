@@ -9,7 +9,15 @@ import org.jetbrains.annotations.Nullable;
 import java.io.DataInputStream;
 import java.io.IOException;
 
-public interface VersionedByteSlimeWorldReader<T> {
+public interface SlimeWorldReader<T> {
 
-    T deserializeWorld(byte version, @Nullable SlimeLoader loader, String worldName, DataInputStream dataStream, SlimePropertyMap propertyMap, boolean readOnly) throws IOException, CorruptedWorldException, NewerFormatException;
+    T deserializeWorld(
+            byte version,
+            @Nullable SlimeLoader loader,
+            String worldName,
+            DataInputStream dataStream,
+            SlimePropertyMap propertyMap,
+            boolean readOnly
+    ) throws IOException, CorruptedWorldException, NewerFormatException;
+
 }

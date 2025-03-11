@@ -1,7 +1,8 @@
 package com.infernalsuite.aswm.api.world;
 
 import com.infernalsuite.aswm.api.utils.NibbleArray;
-import net.kyori.adventure.nbt.CompoundBinaryTag;
+import net.kyori.adventure.nbt.ListBinaryTag;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -9,9 +10,19 @@ import org.jetbrains.annotations.Nullable;
  */
 public interface SlimeChunkSection {
 
-    CompoundBinaryTag getBlockStatesTag();
+    /**
+     * Returns the block palette of the chunk section.
+     *
+     * @return The block palette, contained inside a {@link ListBinaryTag}
+     */
+    @NotNull ListBinaryTag getBlockPalette();
 
-    CompoundBinaryTag getBiomeTag();
+    /**
+     * Returns all the states of the blocks of the chunk section.
+     *
+     * @return A <code>long[]</code> with every block state.
+     */
+    @NotNull long[] getBlockStates();
 
     /**
      * Returns the block light data.

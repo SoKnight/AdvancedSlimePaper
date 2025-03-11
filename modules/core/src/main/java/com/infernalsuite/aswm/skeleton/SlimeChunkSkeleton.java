@@ -9,11 +9,11 @@ import java.util.List;
 public record SlimeChunkSkeleton(
         int x, int z,
         SlimeChunkSection[] sections,
-        CompoundBinaryTag heightMap,
-        List<CompoundBinaryTag> blockEntities,
+        CompoundBinaryTag heightMaps,
+        int[] biomes,
+        List<CompoundBinaryTag> tileEntities,
         List<CompoundBinaryTag> entities,
-        CompoundBinaryTag extra,
-        CompoundBinaryTag upgradeData
+        CompoundBinaryTag extraData
 ) implements SlimeChunk {
 
     @Override
@@ -33,12 +33,17 @@ public record SlimeChunkSkeleton(
 
     @Override
     public CompoundBinaryTag getHeightMaps() {
-        return this.heightMap;
+        return this.heightMaps;
+    }
+
+    @Override
+    public int[] getBiomes() {
+        return this.biomes;
     }
 
     @Override
     public List<CompoundBinaryTag> getTileEntities() {
-        return this.blockEntities;
+        return this.tileEntities;
     }
 
     @Override
@@ -48,12 +53,7 @@ public record SlimeChunkSkeleton(
 
     @Override
     public CompoundBinaryTag getExtraData() {
-        return this.extra;
-    }
-
-    @Override
-    public CompoundBinaryTag getUpgradeData() {
-        return this.upgradeData;
+        return this.extraData;
     }
 
 }

@@ -3,25 +3,25 @@ package com.infernalsuite.aswm.api.world;
 import com.infernalsuite.aswm.api.exceptions.WorldAlreadyExistsException;
 import com.infernalsuite.aswm.api.loaders.SlimeLoader;
 import com.infernalsuite.aswm.api.world.properties.SlimePropertyMap;
-import net.kyori.adventure.nbt.BinaryTag;
 import net.kyori.adventure.nbt.CompoundBinaryTag;
-import org.bukkit.persistence.PersistentDataHolder;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.util.Collection;
-import java.util.concurrent.ConcurrentMap;
+import java.util.List;
 
 /**
  * In-memory representation of a SRF world.
  */
-public interface SlimeWorld extends PersistentDataHolder {
+public interface SlimeWorld {
 
     /**
      * Returns the name of the world.
      *
      * @return The name of the world.
      */
-    String getName();
+    @NotNull String getName();
 
     /**
      * Returns the {@link SlimeLoader} used
@@ -29,7 +29,14 @@ public interface SlimeWorld extends PersistentDataHolder {
      *
      * @return The {@link SlimeLoader} used to load and store the world.
      */
-    SlimeLoader getLoader();
+    @Nullable SlimeLoader getLoader();
+
+    /**
+     * Returns the property map.
+     *
+     * @return A {@link SlimePropertyMap} object containing all the properties of the world.
+     */
+    @NotNull SlimePropertyMap getProperties();
 
     /**
      * Returns the chunk that belongs to the coordinates specified.
@@ -39,22 +46,14 @@ public interface SlimeWorld extends PersistentDataHolder {
      *
      * @return The {@link SlimeChunk} that belongs to those coordinates.
      */
-     SlimeChunk getChunk(int x, int z);
-
-     Collection<SlimeChunk> getChunkStorage();
+    @Nullable SlimeChunk getChunk(int x, int z);
 
     /**
-     * Extra data to be stored alongside the world.
+     * Returns a {@link Collection} with all world chunks.
      *
-     * <p>Any information can be stored inside this map, it will be serialized into a {@link CompoundBinaryTag}
-     * and stored alongside the world data so it can then be retrieved later.</p>
-     *
-     * @apiNote There is a maximum limit of 512 nested tags
-     * @implSpec The returned map must be an implementation of {@link ConcurrentMap} to avoid CMEs, etc.
-     *
-     * @return A Map containing the extra data of the world.
+     * @return A {@link Collection} containing every world chunk.
      */
-    ConcurrentMap<String, BinaryTag> getExtraData();
+    @NotNull Collection<SlimeChunk> getChunkStorage();
 
     /**
      * Returns a {@link Collection} with every world map, serialized
@@ -62,14 +61,7 @@ public interface SlimeWorld extends PersistentDataHolder {
      *
      * @return A {@link Collection} containing every world map.
      */
-    Collection<CompoundBinaryTag> getWorldMaps();
-
-    /**
-     * Returns the property map.
-     *
-     * @return A {@link SlimePropertyMap} object containing all the properties of the world.
-     */
-    SlimePropertyMap getPropertyMap();
+    @NotNull List<CompoundBinaryTag> getWorldMaps();
 
     /**
      * Returns whether read-only is enabled.
@@ -77,6 +69,22 @@ public interface SlimeWorld extends PersistentDataHolder {
      * @return true if read-only is enabled, false otherwise.
      */
     boolean isReadOnly();
+
+    /**
+     * Returns world version value used to identify a world format.
+     *
+     * @return The version of this world.
+     */
+    int getDataVersion();
+
+    /**
+     * Returns the extra data of the world. Inside this {@link CompoundBinaryTag}
+     * can be stored any information to then be retrieved later, as it's
+     * saved alongside the world data.
+     *
+     * @return A {@link CompoundBinaryTag} containing the extra data of the world.
+     */
+    @NotNull CompoundBinaryTag getExtraData();
 
     /**
      * Returns a clone of the world with the given name. This world will never be
@@ -88,7 +96,7 @@ public interface SlimeWorld extends PersistentDataHolder {
      *
      * @throws IllegalArgumentException if the name of the world is the same as the current one or is <code>null</code>.
      */
-    SlimeWorld clone(String worldName);
+    @NotNull SlimeWorld clone(@NotNull String worldName);
 
     /**
      * Returns a clone of the world with the given name. The world will be
@@ -103,8 +111,17 @@ public interface SlimeWorld extends PersistentDataHolder {
      * @throws WorldAlreadyExistsException if there's already a world with the same name inside the provided data source.
      * @throws IOException if the world could not be stored.
      */
-    SlimeWorld clone(String worldName, SlimeLoader loader) throws WorldAlreadyExistsException, IOException;
+    @NotNull SlimeWorld clone(
+            @NotNull String worldName,
+            @Nullable SlimeLoader loader
+    ) throws WorldAlreadyExistsException, IOException;
 
-    int getDataVersion();
+    static long chunkPosition(@NotNull SlimeChunk chunk) {
+        return chunkPosition(chunk.getX(), chunk.getZ());
+    }
+
+    static long chunkPosition(int x, int z) {
+        return ((((long) x) << 32) | (z & 0xFFFFFFFFL));
+    }
 
 }

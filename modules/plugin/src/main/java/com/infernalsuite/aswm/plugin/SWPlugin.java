@@ -1,7 +1,7 @@
 package com.infernalsuite.aswm.plugin;
 
 import com.infernalsuite.aswm.api.AdvancedSlimePaperAPI;
-import com.infernalsuite.aswm.api.SlimeNMSBridge;
+import com.infernalsuite.aswm.api.SlimeInternalsBridge;
 import com.infernalsuite.aswm.api.exceptions.CorruptedWorldException;
 import com.infernalsuite.aswm.api.exceptions.NewerFormatException;
 import com.infernalsuite.aswm.api.exceptions.UnknownWorldException;
@@ -23,7 +23,7 @@ import java.util.*;
 
 public class SWPlugin extends JavaPlugin {
 
-    private static final AdvancedSlimePaperAPI API = AdvancedSlimePaperAPI.instance();
+    private static final AdvancedSlimePaperAPI API = AdvancedSlimePaperAPI.get();
     private static SWPlugin INSTANCE;
 
     private final Map<String, SlimeWorld> worldsToLoad;
@@ -68,7 +68,7 @@ public class SWPlugin extends JavaPlugin {
             SlimeWorld netherWorld = getServer().getAllowNether() ? worldsToLoad.get(defaultWorldName + "_nether") : null;
             SlimeWorld endWorld = getServer().getAllowEnd() ? worldsToLoad.get(defaultWorldName + "_the_end") : null;
 
-            SlimeNMSBridge.instance().setDefaultWorlds(defaultWorld, netherWorld, endWorld);
+            SlimeInternalsBridge.get().setDefaultWorlds(defaultWorld, netherWorld, endWorld);
         } catch (IOException ex) {
             getSLF4JLogger().error("Failed to retrieve default world name", ex);
         }

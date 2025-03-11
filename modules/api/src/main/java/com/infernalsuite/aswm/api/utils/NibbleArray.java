@@ -22,14 +22,14 @@ public final class NibbleArray {
     }
 
     public int get(int index) {
-        int value = this.backing[index / 2];
+        int value = backing[index / 2];
         return index % 2 == 0 ? value & 0xF : (value & 0xF0) >> 4;
     }
 
     public void set(int index, int value) {
         int nibble = value & 0xF;
         int halfIndex = index / 2;
-        int previous = this.backing[halfIndex];
+        int previous = backing[halfIndex];
 
         if (index % 2 == 0) {
             this.backing[halfIndex] = (byte) (previous & 0xF0 | nibble);
@@ -40,7 +40,7 @@ public final class NibbleArray {
 
     @Override
     public @NotNull NibbleArray clone() {
-        return new NibbleArray(this.backing.clone());
+        return new NibbleArray(backing.clone());
     }
 
 }

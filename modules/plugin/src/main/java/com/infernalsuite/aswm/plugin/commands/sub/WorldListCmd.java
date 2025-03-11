@@ -1,6 +1,6 @@
 package com.infernalsuite.aswm.plugin.commands.sub;
 
-import com.infernalsuite.aswm.api.SlimeNMSBridge;
+import com.infernalsuite.aswm.api.SlimeInternalsBridge;
 import com.infernalsuite.aswm.plugin.commands.CommandManager;
 import com.infernalsuite.aswm.plugin.commands.SlimeCommand;
 import com.infernalsuite.aswm.plugin.commands.exception.MessageCommandException;
@@ -47,7 +47,7 @@ public final class WorldListCmd extends SlimeCommand {
 
         Map<String, Boolean> loadedWorlds = Bukkit.getWorlds().stream().collect(Collectors.toMap(
                 World::getName,
-                world -> SlimeNMSBridge.instance().getInstance(world) != null)
+                world -> SlimeInternalsBridge.get().getInstance(world) != null)
         );
 
         boolean onlySlime = args.length > 0 && args[0].equalsIgnoreCase("slime");

@@ -24,7 +24,7 @@ public class SlimeCommand {
     public SlimeCommand(CommandManager commandManager) {
         this.commandManager = commandManager;
         this.plugin = commandManager.getPlugin();
-        this.api = AdvancedSlimePaperAPI.instance();
+        this.api = AdvancedSlimePaperAPI.get();
     }
 
     // This method is here so that we can easily change the behavior in the future

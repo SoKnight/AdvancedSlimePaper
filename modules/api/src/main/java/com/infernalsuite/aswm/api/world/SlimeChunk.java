@@ -1,8 +1,10 @@
 package com.infernalsuite.aswm.api.world;
 
 import net.kyori.adventure.nbt.CompoundBinaryTag;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.Unmodifiable;
 
-import javax.annotation.Nullable;
 import java.util.List;
 
 /**
@@ -29,28 +31,35 @@ public interface SlimeChunk {
      *
      * @return A {@link SlimeChunkSection} array.
      */
-    SlimeChunkSection[] getSections();
+    @NotNull SlimeChunkSection[] getSections();
 
     /**
      * Returns the height maps of the chunk.
      *
      * @return A {@link CompoundBinaryTag} containing all the height maps of the chunk.
      */
-    CompoundBinaryTag getHeightMaps();
+    @NotNull CompoundBinaryTag getHeightMaps();
+
+    /**
+     * Returns all the biomes of the chunk.
+     *
+     * @return A <code>int[]</code> containing all the biomes of the chunk.
+     */
+    @Nullable int[] getBiomes();
 
     /**
      * Returns all the tile entities of the chunk.
      *
      * @return A {@link CompoundBinaryTag} containing all the tile entities of the chunk.
      */
-    List<CompoundBinaryTag> getTileEntities();
+    @NotNull @Unmodifiable List<CompoundBinaryTag> getTileEntities();
 
     /**
      * Returns all the entities of the chunk.
      *
      * @return A {@link CompoundBinaryTag} containing all the entities
      */
-    List<CompoundBinaryTag> getEntities();
+    @NotNull @Unmodifiable List<CompoundBinaryTag> getEntities();
 
     /**
      * Returns the extra data of the chunk.
@@ -63,13 +72,6 @@ public interface SlimeChunk {
      *
      * @return A {@link CompoundBinaryTag} containing the extra data of the chunk,
      */
-    CompoundBinaryTag getExtraData();
-
-    /**
-     * Upgrade data used to fix the chunks.
-     * Not intended to be serialized.
-     * @return A {@link CompoundBinaryTag} containing the upgrade data of the chunk,
-     */
-    @Nullable CompoundBinaryTag getUpgradeData();
+    @NotNull CompoundBinaryTag getExtraData();
 
 }

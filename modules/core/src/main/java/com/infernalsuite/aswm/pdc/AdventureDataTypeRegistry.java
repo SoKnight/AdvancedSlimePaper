@@ -1,7 +1,7 @@
 package com.infernalsuite.aswm.pdc;
 
 import com.google.common.base.Preconditions;
-import com.infernalsuite.aswm.api.SlimeNMSBridge;
+import com.infernalsuite.aswm.api.SlimeInternalsBridge;
 import net.kyori.adventure.nbt.*;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
@@ -58,7 +58,7 @@ public class AdventureDataTypeRegistry {
         if (pdc instanceof AdventurePersistentDataContainer container) {
             builder.put(container.getRaw());
         } else {
-            SlimeNMSBridge.instance().extractCraftPDC(pdc, builder);
+            SlimeInternalsBridge.get().serializeCraftPDC(pdc, builder);
         }
 
         return builder.build();

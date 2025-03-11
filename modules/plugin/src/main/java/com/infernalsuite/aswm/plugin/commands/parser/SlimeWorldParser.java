@@ -26,7 +26,7 @@ public final class SlimeWorldParser implements ArgumentParser<CommandSender, Sli
     ) {
         String input = commandInput.peekString();
 
-        SlimeWorld loaded = AdvancedSlimePaperAPI.instance().getLoadedWorld(input);
+        SlimeWorld loaded = AdvancedSlimePaperAPI.get().getLoadedWorld(input);
         if (loaded == null)
             return ArgumentParseResult.failure(new MessageCommandException(SlimeCommand.COMMAND_PREFIX.append(
                     Component.text("World '%s' is not loaded!".formatted(input)).color(NamedTextColor.RED)
@@ -39,7 +39,7 @@ public final class SlimeWorldParser implements ArgumentParser<CommandSender, Sli
     @Override
     public @NonNull SuggestionProvider<CommandSender> suggestionProvider() {
         return (context, input) -> CompletableFuture.supplyAsync(() ->
-                AdvancedSlimePaperAPI.instance().getLoadedWorlds()
+                AdvancedSlimePaperAPI.get().getLoadedWorlds()
                         .stream()
                         .map(SlimeWorld::getName)
                         .map(Suggestion::suggestion)

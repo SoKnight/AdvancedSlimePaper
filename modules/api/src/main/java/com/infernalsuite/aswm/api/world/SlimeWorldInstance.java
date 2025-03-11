@@ -2,25 +2,23 @@ package com.infernalsuite.aswm.api.world;
 
 import com.infernalsuite.aswm.api.loaders.SlimeLoader;
 import com.infernalsuite.aswm.api.world.properties.SlimePropertyMap;
-import net.kyori.adventure.nbt.BinaryTag;
+import net.kyori.adventure.nbt.CompoundBinaryTag;
 import org.bukkit.World;
-
-import java.util.concurrent.ConcurrentMap;
 
 public interface SlimeWorldInstance {
 
     String getName();
 
+    SlimeLoader getLoader();
+
+    SlimePropertyMap getProperties();
+
     World getBukkitWorld();
 
-    SlimeWorld getSlimeWorldMirror();
-
-    SlimePropertyMap getPropertyMap();
+    SlimeWorld getMirror();
 
     boolean isReadOnly();
 
-    SlimeLoader getLoader();
-
-    ConcurrentMap<String, BinaryTag> getExtraData();
+    CompoundBinaryTag getExtraData();
 
 }

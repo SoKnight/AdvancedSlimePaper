@@ -94,26 +94,26 @@ public final class ImportWorldCmd extends SlimeCommand {
                         WorldData worldData = new WorldData();
                         StringBuilder spawn = new StringBuilder();
 
-                        for (String key : world.getPropertyMap().getProperties().keySet()) {
+                        for (String key : world.getProperties().getProperties().keySet()) {
                             switch (key.toLowerCase()) {
                                 case "spawnx" ->
-                                        spawn.append(world.getPropertyMap().getValue(SlimeProperties.SPAWN_X)).append(", ");
+                                        spawn.append(world.getProperties().getValue(SlimeProperties.SPAWN_X)).append(", ");
                                 case "spawny" ->
-                                        spawn.append(world.getPropertyMap().getValue(SlimeProperties.SPAWN_Y)).append(", ");
-                                case "spawnz" -> spawn.append(world.getPropertyMap().getValue(SlimeProperties.SPAWN_Z));
+                                        spawn.append(world.getProperties().getValue(SlimeProperties.SPAWN_Y)).append(", ");
+                                case "spawnz" -> spawn.append(world.getProperties().getValue(SlimeProperties.SPAWN_Z));
                                 case "environment" ->
-                                        worldData.setEnvironment(world.getPropertyMap().getValue(SlimeProperties.ENVIRONMENT));
+                                        worldData.setEnvironment(world.getProperties().getValue(SlimeProperties.ENVIRONMENT));
                                 case "difficulty" ->
-                                        worldData.setDifficulty(world.getPropertyMap().getValue(SlimeProperties.DIFFICULTY).toLowerCase());
+                                        worldData.setDifficulty(world.getProperties().getValue(SlimeProperties.DIFFICULTY).toLowerCase());
                                 case "allowmonsters" ->
-                                        worldData.setAllowMonsters(world.getPropertyMap().getValue(SlimeProperties.ALLOW_MONSTERS));
+                                        worldData.setAllowMonsters(world.getProperties().getValue(SlimeProperties.ALLOW_MONSTERS));
                                 case "dragonbattle" ->
-                                        worldData.setDragonBattle(world.getPropertyMap().getValue(SlimeProperties.DRAGON_BATTLE));
-                                case "pvp" -> worldData.setPvp(world.getPropertyMap().getValue(SlimeProperties.PVP));
+                                        worldData.setDragonBattle(world.getProperties().getValue(SlimeProperties.DRAGON_BATTLE));
+                                case "pvp" -> worldData.setPvp(world.getProperties().getValue(SlimeProperties.PVP));
                                 case "worldtype" ->
-                                        worldData.setWorldType(world.getPropertyMap().getValue(SlimeProperties.WORLD_TYPE));
+                                        worldData.setWorldType(world.getProperties().getValue(SlimeProperties.WORLD_TYPE));
                                 case "defaultbiome" ->
-                                        worldData.setDefaultBiome(world.getPropertyMap().getValue(SlimeProperties.DEFAULT_BIOME));
+                                        worldData.setDefaultBiome(world.getProperties().getValue(SlimeProperties.DEFAULT_BIOME));
                             }
                         }
 

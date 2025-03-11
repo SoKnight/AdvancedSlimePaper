@@ -3,23 +3,25 @@ package com.infernalsuite.aswm.skeleton;
 import com.infernalsuite.aswm.api.utils.NibbleArray;
 import com.infernalsuite.aswm.api.world.SlimeChunkSection;
 import net.kyori.adventure.nbt.CompoundBinaryTag;
+import net.kyori.adventure.nbt.ListBinaryTag;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public record SlimeChunkSectionSkeleton(
-        CompoundBinaryTag blockStates,
-        CompoundBinaryTag biome,
+        ListBinaryTag blockPalette,
+        long[] blockStates,
         NibbleArray block,
         NibbleArray light
 ) implements SlimeChunkSection {
 
     @Override
-    public CompoundBinaryTag getBlockStatesTag() {
-        return this.blockStates;
+    public @NotNull ListBinaryTag getBlockPalette() {
+        return this.blockPalette;
     }
 
     @Override
-    public CompoundBinaryTag getBiomeTag() {
-        return this.biome;
+    public @NotNull long[] getBlockStates() {
+        return this.blockStates;
     }
 
     @Override
@@ -28,7 +30,7 @@ public record SlimeChunkSectionSkeleton(
     }
 
     @Override
-    public NibbleArray getSkyLight() {
+    public @Nullable NibbleArray getSkyLight() {
         return this.light;
     }
 

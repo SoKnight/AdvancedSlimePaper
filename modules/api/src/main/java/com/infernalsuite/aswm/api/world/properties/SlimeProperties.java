@@ -98,9 +98,4 @@ public class SlimeProperties {
             value.equalsIgnoreCase("aggressive") || value.equalsIgnoreCase("never")
     );
 
-    @ApiStatus.Experimental
-    public static final SlimePropertyInt CHUNK_SECTION_MIN = SlimePropertyInt.create("chunkSectionMin", -4);
-    @ApiStatus.Experimental
-    public static final SlimePropertyInt CHUNK_SECTION_MAX = SlimePropertyInt.create("chunkSectionMin", 19);
-
 }

@@ -1,6 +1,6 @@
 package com.infernalsuite.aswm.plugin.commands.sub;
 
-import com.infernalsuite.aswm.api.SlimeNMSBridge;
+import com.infernalsuite.aswm.api.SlimeInternalsBridge;
 import com.infernalsuite.aswm.api.loaders.SlimeLoader;
 import com.infernalsuite.aswm.api.world.SlimeWorld;
 import com.infernalsuite.aswm.plugin.commands.CommandManager;
@@ -95,7 +95,7 @@ public final class DSListCmd extends SlimeCommand {
         if (world == null)
             return false;
 
-        SlimeWorld slimeWorld = SlimeNMSBridge.instance().getInstance(world).getSlimeWorldMirror();
+        SlimeWorld slimeWorld = SlimeInternalsBridge.get().getInstance(world).getMirror();
         if (slimeWorld == null)
             return false;
 

@@ -6,11 +6,14 @@ import com.infernalsuite.aswm.api.world.SlimeWorld;
 import com.infernalsuite.aswm.api.world.properties.SlimePropertyMap;
 import org.bukkit.World;
 import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.Unmodifiable;
 
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.List;
+import java.util.Optional;
 import java.util.ServiceLoader;
 
 /**
@@ -35,12 +38,12 @@ public interface AdvancedSlimePaperAPI {
      * @throws CorruptedWorldException if the world retrieved cannot be parsed into a {@link SlimeWorld} object.
      * @throws NewerFormatException    if the world uses a newer version of the SRF.
      */
-    SlimeWorld readWorld(
-            SlimeLoader loader,
-            String worldName,
+    @NotNull SlimeWorld readWorld(
+            @NotNull SlimeLoader loader,
+            @NotNull String worldName,
             boolean readOnly,
-            SlimePropertyMap propertyMap
-    ) throws UnknownWorldException, IOException, CorruptedWorldException, NewerFormatException;
+            @NotNull SlimePropertyMap propertyMap
+    ) throws UnknownWorldException, IOException, CorruptedWorldException, NewerFormatException, MismatchedWorldVersionException;
 
     /**
      * Gets a world which has already been loaded by ASWM.
@@ -48,7 +51,15 @@ public interface AdvancedSlimePaperAPI {
      * @param worldName the name of the world to get
      * @return the loaded world, or {@code null} if no loaded world matches the given name
      */
-    SlimeWorld getLoadedWorld(String worldName);
+    @Nullable SlimeWorld getLoadedWorld(@NotNull String worldName);
+
+    /**
+     * Finds a world which has already been loaded by ASWM.
+     *
+     * @param worldName the name of the world to find
+     * @return the wrapped loaded world, or {@code Optional#empty()} if no loaded world matches the given name
+     */
+    @NotNull Optional<SlimeWorld> findLoadedWorld(@NotNull String worldName);
 
     /**
      * Gets a list of worlds which have been loaded by ASWM.
@@ -56,7 +67,7 @@ public interface AdvancedSlimePaperAPI {
      *
      * @return a list of worlds
      */
-    List<SlimeWorld> getLoadedWorlds();
+    @NotNull @Unmodifiable List<SlimeWorld> getLoadedWorlds();
 
     /**
      * Generates a Minecraft World from a {@link SlimeWorld} and
@@ -69,7 +80,10 @@ public interface AdvancedSlimePaperAPI {
      * @throws IllegalArgumentException if the world is already loaded
      * @return Returns a slime world representing a live minecraft world
      */
-    SlimeWorld loadWorld(SlimeWorld world, boolean callWorldLoadEvent) throws IllegalArgumentException;
+    @NotNull SlimeWorld loadWorld(
+            @NotNull SlimeWorld world,
+            boolean callWorldLoadEvent
+    ) throws IllegalArgumentException;
 
     /**
      * Checks if a {@link SlimeWorld} is loaded on the server.
@@ -77,7 +91,7 @@ public interface AdvancedSlimePaperAPI {
      * @param world The {@link SlimeWorld} to check.
      * @return {@code true} if the world is loaded, {@code false} otherwise.
      */
-    boolean worldLoaded(SlimeWorld world);
+    boolean worldLoaded(@NotNull SlimeWorld world);
 
     /**
      * Saves a {@link SlimeWorld} into the {@link SlimeLoader} obtained from {@link SlimeWorld#getLoader()}
@@ -87,7 +101,7 @@ public interface AdvancedSlimePaperAPI {
      * @param world The {@link SlimeWorld} to save.
      * @throws IOException if the world could not be saved.
      */
-    void saveWorld(SlimeWorld world) throws IOException;
+    void saveWorld(@NotNull SlimeWorld world) throws IOException;
 
     /**
      * Migrates a {@link SlimeWorld} to another datasource.
@@ -99,7 +113,11 @@ public interface AdvancedSlimePaperAPI {
      * @throws WorldAlreadyExistsException if a world with the same name already exists inside the new data source.
      * @throws UnknownWorldException       if the world has been removed from the old data source.
      */
-    void migrateWorld(String worldName, SlimeLoader currentLoader, SlimeLoader newLoader) throws IOException, WorldAlreadyExistsException, UnknownWorldException;
+    void migrateWorld(
+            @NotNull String worldName,
+            @NotNull SlimeLoader currentLoader,
+            @NotNull SlimeLoader newLoader
+    ) throws IOException, WorldAlreadyExistsException, UnknownWorldException;
 
     /**
      * Creates an empty world.
@@ -112,7 +130,12 @@ public interface AdvancedSlimePaperAPI {
      * @param loader      The {@link SlimeLoader} used to store the world when it gets loaded, or <code>null</code> if the world is temporary.
      * @return A {@link SlimeWorld}, which is the in-memory representation of the world.
      */
-    SlimeWorld createEmptyWorld(String worldName, boolean readOnly, SlimePropertyMap propertyMap, @Nullable SlimeLoader loader);
+    @NotNull SlimeWorld createEmptyWorld(
+            @NotNull String worldName,
+            boolean readOnly,
+            @NotNull SlimePropertyMap propertyMap,
+            @Nullable SlimeLoader loader
+    );
 
     /**
      * Reads a vanilla world and converts it to SRF.
@@ -128,14 +151,18 @@ public interface AdvancedSlimePaperAPI {
      * @throws WorldTooBigException        if the world is too big to be imported into the SRF.
      * @throws IOException                 if the world could not be read or stored.
      */
-    SlimeWorld readVanillaWorld(File worldDir, String worldName, @Nullable SlimeLoader loader) throws InvalidWorldException, WorldLoadedException, WorldTooBigException, IOException, WorldAlreadyExistsException;
+    @NotNull SlimeWorld readVanillaWorld(
+            @NotNull Path worldDir,
+            @NotNull String worldName,
+            @Nullable SlimeLoader loader
+    ) throws InvalidWorldException, WorldLoadedException, WorldTooBigException, IOException, WorldAlreadyExistsException;
 
     /**
      * Gets the instance of the AdvancedSlimePaper API.
      *
      * @return the instance of the AdvancedSlimePaper API
      */
-    static AdvancedSlimePaperAPI instance() {
+    static @NotNull AdvancedSlimePaperAPI get() {
         return Holder.INSTANCE;
     }
 

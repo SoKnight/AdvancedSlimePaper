@@ -17,17 +17,14 @@ import java.util.Map;
 
 public class SlimeWorldReaderRegistry {
 
-    private static final Map<Byte, VersionedByteSlimeWorldReader<SlimeWorld>> FORMATS = new HashMap<>();
+    private static final Map<Byte, SlimeWorldReader<SlimeWorld>> FORMATS = new HashMap<>();
 
     static {
-//        register(v1_9WorldFormat.FORMAT, 1, 2, 3, 4, 5, 6, 7, 8, 9);
-//        register(v10WorldFormat.FORMAT, 10);
-//        register(v11WorldFormat.FORMAT, 11);
         register(WorldFormatV12.FORMAT, 12);
     }
 
     @SuppressWarnings("SameParameterValue")
-    private static void register(VersionedByteSlimeWorldReader<SlimeWorld> format, int... bytes) {
+    private static void register(SlimeWorldReader<SlimeWorld> format, int... bytes) {
         for (int value : bytes) {
             FORMATS.put((byte) value, format);
         }
@@ -53,7 +50,7 @@ public class SlimeWorldReaderRegistry {
         if (version > SlimeFormat.SLIME_VERSION)
             throw new NewerFormatException(version);
 
-        VersionedByteSlimeWorldReader<SlimeWorld> reader = FORMATS.get(version);
+        SlimeWorldReader<SlimeWorld> reader = FORMATS.get(version);
         return reader.deserializeWorld(version, loader, worldName, dataStream, propertyMap, readOnly);
     }
 
