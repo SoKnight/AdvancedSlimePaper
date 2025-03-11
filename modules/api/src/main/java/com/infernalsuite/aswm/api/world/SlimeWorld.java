@@ -56,6 +56,12 @@ public interface SlimeWorld {
     @NotNull Collection<SlimeChunk> getChunkStorage();
 
     /**
+     * Updates chunk in the world chunk storage.
+     * @param chunk Chunk to update.
+     */
+    void updateChunk(@NotNull SlimeChunk chunk);
+
+    /**
      * Returns a {@link Collection} with every world map, serialized
      * in a {@link CompoundBinaryTag} object.
      *

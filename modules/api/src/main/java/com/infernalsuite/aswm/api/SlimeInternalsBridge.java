@@ -16,6 +16,8 @@ public interface SlimeInternalsBridge {
 
     int getCurrentVersion();
 
+    boolean isLoadingDefaultWorlds();
+
     boolean loadOverworldOverride();
 
     boolean loadNetherOverride();
@@ -35,6 +37,10 @@ public interface SlimeInternalsBridge {
     PersistentDataContainer deserializeCraftPDC(CompoundBinaryTag source);
 
     void serializeCraftPDC(PersistentDataContainer source, CompoundBinaryTag.Builder builder);
+
+    boolean shouldBeAdded(World world);
+
+    boolean trySaveChunk(Object world, Object chunkAccess);
 
     static @NotNull SlimeInternalsBridge get() {
         return Holder.INSTANCE;

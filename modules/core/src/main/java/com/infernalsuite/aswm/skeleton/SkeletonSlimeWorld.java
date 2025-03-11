@@ -49,7 +49,13 @@ public final class SkeletonSlimeWorld implements SlimeWorld {
 
     @Override
     public SlimeChunk getChunk(int x, int z) {
-        return this.chunkStorage.get(SlimeWorld.chunkPosition(x, z));
+        return chunkStorage.get(SlimeWorld.chunkPosition(x, z));
+    }
+
+    @Override
+    public void updateChunk(SlimeChunk chunk) {
+        Objects.requireNonNull(chunk, "chunk cannot be null");
+        this.chunkStorage.put(SlimeWorld.chunkPosition(chunk), chunk);
     }
 
     @Override
