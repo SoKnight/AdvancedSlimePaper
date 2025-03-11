@@ -12,6 +12,7 @@ import net.kyori.adventure.nbt.CompoundBinaryTag;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 
@@ -50,6 +51,11 @@ public final class SkeletonSlimeWorld implements SlimeWorld {
     @Override
     public SlimeChunk getChunk(int x, int z) {
         return chunkStorage.get(SlimeWorld.chunkPosition(x, z));
+    }
+
+    @Override
+    public @NotNull Collection<SlimeChunk> getChunkStorage() {
+        return chunkStorage.values();
     }
 
     @Override
