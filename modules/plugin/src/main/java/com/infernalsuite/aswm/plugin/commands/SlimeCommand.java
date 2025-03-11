@@ -2,6 +2,7 @@ package com.infernalsuite.aswm.plugin.commands;
 
 import com.infernalsuite.aswm.api.AdvancedSlimePaperAPI;
 import com.infernalsuite.aswm.api.exceptions.CorruptedWorldException;
+import com.infernalsuite.aswm.api.exceptions.MismatchedWorldVersionException;
 import com.infernalsuite.aswm.api.exceptions.NewerFormatException;
 import com.infernalsuite.aswm.api.exceptions.UnknownWorldException;
 import com.infernalsuite.aswm.api.loaders.SlimeLoader;
@@ -32,7 +33,7 @@ public class SlimeCommand {
             String name,
             SlimeLoader loader,
             SlimePropertyMap propertyMap
-    ) throws CorruptedWorldException, NewerFormatException, UnknownWorldException, IOException {
+    ) throws CorruptedWorldException, NewerFormatException, UnknownWorldException, IOException, MismatchedWorldVersionException {
         return api.readWorld(loader, name, false, propertyMap);
     }
 

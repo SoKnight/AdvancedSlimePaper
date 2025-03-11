@@ -2,6 +2,7 @@ package com.infernalsuite.aswm.plugin.commands.sub;
 
 
 import com.infernalsuite.aswm.api.exceptions.CorruptedWorldException;
+import com.infernalsuite.aswm.api.exceptions.MismatchedWorldVersionException;
 import com.infernalsuite.aswm.api.exceptions.NewerFormatException;
 import com.infernalsuite.aswm.api.exceptions.UnknownWorldException;
 import com.infernalsuite.aswm.api.loaders.SlimeLoader;
@@ -92,6 +93,10 @@ public final class LoadTemplateWorldCmd extends SlimeCommand {
                         Component.text("World ").color(NamedTextColor.GREEN)
                                 .append(Component.text(worldName).color(NamedTextColor.YELLOW))
                                 .append(Component.text(" loaded and generated in " + (System.currentTimeMillis() - start) + "ms!")).color(NamedTextColor.GREEN)
+                ));
+            } catch (MismatchedWorldVersionException ex) {
+                throw new MessageCommandException(COMMAND_PREFIX.append(
+                        Component.text("Failed to load world '%s': world has unexpected data version %d (expected: %d).".formatted(templateWorldData.name(), ex.getActual(), ex.getExpected())).color(NamedTextColor.RED)
                 ));
             } catch (CorruptedWorldException ex) {
                 log.error("Failed to load world '{}': world seems to be corrupted.", templateWorldData.name(), ex);

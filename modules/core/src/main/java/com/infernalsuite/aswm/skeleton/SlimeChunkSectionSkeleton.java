@@ -2,7 +2,6 @@ package com.infernalsuite.aswm.skeleton;
 
 import com.infernalsuite.aswm.api.utils.NibbleArray;
 import com.infernalsuite.aswm.api.world.SlimeChunkSection;
-import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.kyori.adventure.nbt.ListBinaryTag;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;

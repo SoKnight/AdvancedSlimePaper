@@ -38,6 +38,7 @@ public final class NibbleArray {
         }
     }
 
+    @SuppressWarnings("MethodDoesntCallSuperMethod")
     @Override
     public @NotNull NibbleArray clone() {
         return new NibbleArray(backing.clone());

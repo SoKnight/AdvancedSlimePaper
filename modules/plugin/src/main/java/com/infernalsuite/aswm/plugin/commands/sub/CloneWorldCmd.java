@@ -1,9 +1,6 @@
 package com.infernalsuite.aswm.plugin.commands.sub;
 
-import com.infernalsuite.aswm.api.exceptions.CorruptedWorldException;
-import com.infernalsuite.aswm.api.exceptions.NewerFormatException;
-import com.infernalsuite.aswm.api.exceptions.UnknownWorldException;
-import com.infernalsuite.aswm.api.exceptions.WorldAlreadyExistsException;
+import com.infernalsuite.aswm.api.exceptions.*;
 import com.infernalsuite.aswm.api.loaders.SlimeLoader;
 import com.infernalsuite.aswm.api.world.SlimeWorld;
 import com.infernalsuite.aswm.plugin.commands.CommandManager;
@@ -102,6 +99,10 @@ public final class CloneWorldCmd extends SlimeCommand {
                     ));
                 });
                 config.save();
+            } catch (MismatchedWorldVersionException ex) {
+                throw new MessageCommandException(COMMAND_PREFIX.append(
+                        Component.text("Failed to load world '%s': world has unexpected data version %d (expected: %d).".formatted(templateWorld.name(), ex.getActual(), ex.getExpected())).color(NamedTextColor.RED)
+                ));
             } catch (WorldAlreadyExistsException ex) {
                 throw new MessageCommandException(COMMAND_PREFIX.append(
                         Component.text("There is already a world called '%s' stored in '%s'.".formatted(worldName, dataSource)).color(NamedTextColor.RED)

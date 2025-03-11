@@ -3,6 +3,7 @@ package com.infernalsuite.aswm.plugin;
 import com.infernalsuite.aswm.api.AdvancedSlimePaperAPI;
 import com.infernalsuite.aswm.api.SlimeInternalsBridge;
 import com.infernalsuite.aswm.api.exceptions.CorruptedWorldException;
+import com.infernalsuite.aswm.api.exceptions.MismatchedWorldVersionException;
 import com.infernalsuite.aswm.api.exceptions.NewerFormatException;
 import com.infernalsuite.aswm.api.exceptions.UnknownWorldException;
 import com.infernalsuite.aswm.api.loaders.SlimeLoader;
@@ -107,7 +108,7 @@ public class SWPlugin extends JavaPlugin {
                     SlimeWorld world = API.readWorld(loader, worldName, worldData.isReadOnly(), propertyMap);
                     worldsToLoad.put(worldName, world);
                 } catch (IllegalArgumentException | UnknownWorldException | NewerFormatException |
-                         CorruptedWorldException | IOException ex) {
+                         CorruptedWorldException | IOException | MismatchedWorldVersionException ex) {
                     String message;
                     if (ex instanceof IllegalArgumentException) {
                         message = ex.getMessage();
