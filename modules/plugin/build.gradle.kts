@@ -3,7 +3,7 @@ plugins {
 }
 
 dependencies {
-    packaged(projects.modules.core)
+    compileOnly(projects.modules.api)
     packaged(projects.modules.loaders)
 
     packaged(libs.configurateYaml)
@@ -26,7 +26,7 @@ tasks.processResources {
 tasks.shadowJar {
     dependencies {
         exclude { it.moduleGroup == "io.netty" }
-        exclude { it.moduleGroup == "net.kyori" && it.moduleName == "adventure-nbt" }
+        exclude { it.moduleGroup == "net.kyori" && it.moduleName == "option" }
     }
 
     relocate("org.bstats", "com.infernalsuite.aswm.internal.bstats")
@@ -34,6 +34,4 @@ tasks.shadowJar {
     relocate("com.flowpowered.nbt", "com.infernalsuite.aswm.internal.nbt")
     relocate("io.lettuce", "com.infernalsuite.aswm.internal.lettuce")
     relocate("org.bson", "com.infernalsuite.aswm.internal.bson")
-    relocate("net.kyori.option", "com.infernalsuite.aswm.internal.kyori.option")
-    relocate("com.github.luben.zstd", "com.infernalsuite.aswm.internal.zstd")
 }
