@@ -86,7 +86,7 @@ final class AnvilWorldChunkReader {
                     : new InflaterInputStream(rawChunkStream);
 
             CompoundBinaryTag levelTag = BinaryTagIO.unlimitedReader().read(chunkStream).getCompound("Level");
-            if (levelTag.size() == 0)
+            if (levelTag.keySet().isEmpty())
                 throw new RuntimeException("Missing Level tag?");
 
             return readChunk(levelTag, worldVersion);
@@ -150,7 +150,7 @@ final class AnvilWorldChunkReader {
         CompoundBinaryTag.Builder builder = CompoundBinaryTag.builder();
 
         CompoundBinaryTag chunkBukkitValuesTag = levelTag.getCompound("ChunkBukkitValues");
-        if (chunkBukkitValuesTag.size() > 0)
+        if (!chunkBukkitValuesTag.keySet().isEmpty())
             builder.put("ChunkBukkitValues", chunkBukkitValuesTag);
 
         return builder.build();

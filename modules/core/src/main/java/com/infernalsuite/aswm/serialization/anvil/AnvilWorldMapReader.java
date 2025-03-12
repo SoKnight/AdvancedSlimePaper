@@ -54,7 +54,7 @@ final class AnvilWorldMapReader {
         int mapId = Integer.parseInt(matcher.group(1));
         CompoundBinaryTag globalTag = BinaryTagIO.unlimitedReader().read(mapFile);
         CompoundBinaryTag dataTag = globalTag.getCompound("data");
-        return dataTag.put("id", IntBinaryTag.intBinaryTag(mapId));
+        return dataTag.put("id", IntBinaryTag.of(mapId));
     }
 
     private static boolean isMapFile(Path filePath) {

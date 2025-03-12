@@ -81,11 +81,11 @@ public final class SkeletonCloning {
             SlimeChunkSkeleton clonedChunk = new SlimeChunkSkeleton(
                     chunk.getX(), chunk.getZ(),
                     sectionsCopy,
-                    CompoundBinaryTag.builder().put(chunk.getHeightMaps()).build(),
+                    chunk.getHeightMaps(),
                     biomes,
                     deepClone(chunk.getTileEntities()),
                     deepClone(chunk.getEntities()),
-                    CompoundBinaryTag.builder().put(chunk.getExtraData()).build()
+                    chunk.getExtraData()
             );
 
             chunkStorageCopy.put(SlimeWorld.chunkPosition(chunk), clonedChunk);

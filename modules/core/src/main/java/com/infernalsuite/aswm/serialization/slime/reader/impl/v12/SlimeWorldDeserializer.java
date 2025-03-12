@@ -13,14 +13,16 @@ import com.infernalsuite.aswm.skeleton.SlimeChunkSectionSkeleton;
 import com.infernalsuite.aswm.skeleton.SlimeChunkSkeleton;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
-import net.kyori.adventure.nbt.*;
+import net.kyori.adventure.nbt.BinaryTagIO;
+import net.kyori.adventure.nbt.BinaryTagTypes;
+import net.kyori.adventure.nbt.CompoundBinaryTag;
+import net.kyori.adventure.nbt.ListBinaryTag;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
-import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -29,6 +31,7 @@ import java.util.stream.Collectors;
 @SuppressWarnings("ResultOfMethodCallIgnored")
 final class SlimeWorldDeserializer implements SlimeWorldReader<SlimeWorld> {
 
+    public static final long[] EMPTY_LONG_ARRAY = new long[0];
     public static final int NIBBLE_ARRAY_SIZE = 2048;
 
     @Override
@@ -52,7 +55,7 @@ final class SlimeWorldDeserializer implements SlimeWorldReader<SlimeWorld> {
 
         SlimePropertyMap properties = propertyMap;
         CompoundBinaryTag propertiesTag = extraData.getCompound("properties");
-        if (propertiesTag.size() != 0) {
+        if (!propertiesTag.keySet().isEmpty()) {
             properties = SlimePropertyMap.fromCompound(propertiesTag);
             properties.merge(propertyMap);
         }
@@ -125,9 +128,9 @@ final class SlimeWorldDeserializer implements SlimeWorldReader<SlimeWorld> {
 
             // Block states
             int blockStatesLength = chunkData.readInt();
-            byte[] rawBlockStates = new byte[blockStatesLength * (Long.SIZE / Byte.SIZE)];
-            ByteBuffer blockStatesBuffer = ByteBuffer.wrap(rawBlockStates);
-            long[] blockStates = blockStatesBuffer.asLongBuffer().array();
+            long[] blockStates = blockStatesLength > 0 ? new long[blockStatesLength] : EMPTY_LONG_ARRAY;
+            for (int i = 0; i < blockPaletteLength; i++)
+                blockStates[i] = chunkData.readLong();
 
             chunkSections[sectionId] = new SlimeChunkSectionSkeleton(blockPalette, blockStates, blockLightArray, skyLightArray);
         }
@@ -149,10 +152,11 @@ final class SlimeWorldDeserializer implements SlimeWorldReader<SlimeWorld> {
         if (biomesSize == 0)
             return null;
 
-        byte[] serializedData = new byte[biomesSize * (Integer.SIZE / Byte.SIZE)];
-        chunkData.read(serializedData);
-        ByteBuffer biomesBuffer = ByteBuffer.wrap(serializedData);
-        return biomesBuffer.asIntBuffer().array();
+        int[] biomes = new int[biomesSize];
+        for (int i = 0; i < biomesSize; i++)
+            biomes[i] = chunkData.readInt();
+
+        return biomes;
     }
 
     private static @NotNull List<CompoundBinaryTag> readChunkCompoundTag(DataInputStream chunkData, String tagName) throws IOException {

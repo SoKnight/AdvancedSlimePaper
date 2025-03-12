@@ -10,11 +10,13 @@ import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import lombok.Getter;
 import net.kyori.adventure.nbt.CompoundBinaryTag;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Consumer;
 
 @Getter
 public final class SkeletonSlimeWorld implements SlimeWorld {
@@ -26,7 +28,7 @@ public final class SkeletonSlimeWorld implements SlimeWorld {
     private final List<CompoundBinaryTag> worldMaps;
     private final boolean readOnly;
     private final int dataVersion;
-    private final CompoundBinaryTag extraData;
+    private @NotNull CompoundBinaryTag extraData;
 
     public SkeletonSlimeWorld(
             String name,
@@ -36,7 +38,7 @@ public final class SkeletonSlimeWorld implements SlimeWorld {
             List<CompoundBinaryTag> worldMaps,
             boolean readOnly,
             int dataVersion,
-            CompoundBinaryTag extraData
+            @NotNull CompoundBinaryTag extraData
     ) {
         this.name = name;
         this.loader = loader;
@@ -45,7 +47,7 @@ public final class SkeletonSlimeWorld implements SlimeWorld {
         this.worldMaps = worldMaps;
         this.readOnly = readOnly;
         this.dataVersion = dataVersion;
-        this.extraData = extraData;
+        putExtraData(extraData);
     }
 
     @Override
@@ -59,9 +61,28 @@ public final class SkeletonSlimeWorld implements SlimeWorld {
     }
 
     @Override
-    public void updateChunk(SlimeChunk chunk) {
+    public void updateChunk(@NotNull SlimeChunk chunk) {
         Objects.requireNonNull(chunk, "chunk cannot be null");
         this.chunkStorage.put(SlimeWorld.chunkPosition(chunk), chunk);
+    }
+
+    @Override
+    public @NotNull CompoundBinaryTag putExtraData(@Nullable CompoundBinaryTag extraData) {
+        this.extraData = extraData != null ? extraData : CompoundBinaryTag.empty();
+        return this.extraData;
+    }
+
+    @Override
+    public @NotNull CompoundBinaryTag updateExtraData(@NotNull Consumer<CompoundBinaryTag.Builder> compoundCustomizer) {
+        Objects.requireNonNull(compoundCustomizer, "compoundCustomizer cannot be null");
+        CompoundBinaryTag.Builder builder = CompoundBinaryTag.builder();
+
+        if (extraData != null)
+            builder.put(extraData);
+
+        compoundCustomizer.accept(builder);
+        this.extraData = builder.build();
+        return extraData;
     }
 
     @Override

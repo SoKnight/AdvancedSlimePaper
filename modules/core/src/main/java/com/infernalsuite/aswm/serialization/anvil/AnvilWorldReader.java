@@ -60,7 +60,7 @@ public final class AnvilWorldReader implements SlimeWorldReader<AnvilImportData>
             CompoundBinaryTag.Builder extraDataBuilder = CompoundBinaryTag.builder();
             if (!data.gameRules().isEmpty()) {
                 CompoundBinaryTag.Builder gameRulesBuilder = CompoundBinaryTag.builder();
-                data.gameRules().forEach((rule, value) -> gameRulesBuilder.put(rule, StringBinaryTag.stringBinaryTag(value)));
+                data.gameRules().forEach((rule, value) -> gameRulesBuilder.put(rule, StringBinaryTag.of(value)));
                 extraDataBuilder.put("gamerules", gameRulesBuilder.build());
             }
 
@@ -82,14 +82,14 @@ public final class AnvilWorldReader implements SlimeWorldReader<AnvilImportData>
     private static LevelData readLevelData(Path file) throws IOException, InvalidWorldException {
         CompoundBinaryTag tag = BinaryTagIO.unlimitedReader().read(file);
         CompoundBinaryTag dataTag = tag.getCompound("Data");
-        if (dataTag.size() == 0)
+        if (dataTag.keySet().isEmpty())
             throw new InvalidWorldException(file.getParent());
 
         int dataVersion = dataTag.getInt("DataVersion", -1);
 
         Map<String, String> gameRules = new HashMap<>();
         CompoundBinaryTag gameRulesTag = dataTag.getCompound("GameRules");
-        if (gameRulesTag.size() != 0)
+        if (!gameRulesTag.keySet().isEmpty())
             gameRulesTag.forEach(entry -> {
                 if (entry.getValue() instanceof StringBinaryTag cast) {
                     gameRules.put(entry.getKey(), cast.value());

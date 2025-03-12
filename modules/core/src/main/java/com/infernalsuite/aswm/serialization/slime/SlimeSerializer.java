@@ -30,7 +30,7 @@ public final class SlimeSerializer {
         // Store world properties
         SlimePropertyMap properties = world.getProperties();
         CompoundBinaryTag propertiesTag = extraData.getCompound("properties").put(properties.toCompound());
-        extraData = propertiesTag.size() != 0
+        extraData = !propertiesTag.keySet().isEmpty()
                 ? extraData.put("properties", propertiesTag)
                 : extraData.remove("properties");
 
@@ -148,7 +148,7 @@ public final class SlimeSerializer {
     }
 
     private static void serializeChunkCompoundTag(List<CompoundBinaryTag> chunk, String tagName, DataOutputStream outStream) throws IOException {
-        ListBinaryTag nbtList = ListBinaryTag.listBinaryTag(BinaryTagTypes.COMPOUND, yayGenerics(chunk));
+        ListBinaryTag nbtList = ListBinaryTag.of(BinaryTagTypes.COMPOUND, yayGenerics(chunk));
         CompoundBinaryTag tag = CompoundBinaryTag.builder().put(tagName, nbtList).build();
         byte[] serializedData = serializeCompoundTag(tag);
         outStream.writeInt(serializedData.length);
@@ -186,7 +186,7 @@ public final class SlimeSerializer {
     }
 
     private static byte[] serializeCompoundTag(CompoundBinaryTag tag) throws IOException {
-        if (tag == null || tag.size() == 0)
+        if (tag == null || tag.keySet().isEmpty())
             return new byte[0];
 
         ByteArrayOutputStream outByteStream = new ByteArrayOutputStream();

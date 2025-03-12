@@ -149,16 +149,16 @@ public class AdventureDataTypeRegistry {
 
         private static Map<Class<?>, TagAdapter<?, ?>> initPrimitiveAdapters() {
             final Map<Class<?>, TagAdapter<?, ?>> adapters = new IdentityHashMap<>();
-            adapters.put(Byte.class, TagAdapter.of(Byte.class, ByteBinaryTag.class, BinaryTagTypes.BYTE, ByteBinaryTag::byteBinaryTag, ByteBinaryTag::value));
-            adapters.put(Short.class, TagAdapter.of(Short.class, ShortBinaryTag.class, BinaryTagTypes.SHORT, ShortBinaryTag::shortBinaryTag, ShortBinaryTag::value));
-            adapters.put(Integer.class, TagAdapter.of(Integer.class, IntBinaryTag.class, BinaryTagTypes.INT, IntBinaryTag::intBinaryTag, IntBinaryTag::value));
-            adapters.put(Long.class, TagAdapter.of(Long.class, LongBinaryTag.class, BinaryTagTypes.LONG, LongBinaryTag::longBinaryTag, LongBinaryTag::value));
-            adapters.put(Float.class, TagAdapter.of(Float.class, FloatBinaryTag.class, BinaryTagTypes.FLOAT, FloatBinaryTag::floatBinaryTag, FloatBinaryTag::value));
-            adapters.put(Double.class, TagAdapter.of(Double.class, DoubleBinaryTag.class, BinaryTagTypes.DOUBLE, DoubleBinaryTag::doubleBinaryTag, DoubleBinaryTag::value));
-            adapters.put(String.class, TagAdapter.of(String.class, StringBinaryTag.class, BinaryTagTypes.STRING, StringBinaryTag::stringBinaryTag, StringBinaryTag::value));
-            adapters.put(byte[].class, TagAdapter.of(byte[].class, ByteArrayBinaryTag.class, BinaryTagTypes.BYTE_ARRAY, ByteArrayBinaryTag::byteArrayBinaryTag, ByteArrayBinaryTag::value));
-            adapters.put(int[].class, TagAdapter.of(int[].class, IntArrayBinaryTag.class, BinaryTagTypes.INT_ARRAY, IntArrayBinaryTag::intArrayBinaryTag, IntArrayBinaryTag::value));
-            adapters.put(long[].class, TagAdapter.of(long[].class, LongArrayBinaryTag.class, BinaryTagTypes.LONG_ARRAY, LongArrayBinaryTag::longArrayBinaryTag, LongArrayBinaryTag::value));
+            adapters.put(Byte.class, TagAdapter.of(Byte.class, ByteBinaryTag.class, BinaryTagTypes.BYTE, ByteBinaryTag::of, ByteBinaryTag::value));
+            adapters.put(Short.class, TagAdapter.of(Short.class, ShortBinaryTag.class, BinaryTagTypes.SHORT, ShortBinaryTag::of, ShortBinaryTag::value));
+            adapters.put(Integer.class, TagAdapter.of(Integer.class, IntBinaryTag.class, BinaryTagTypes.INT, IntBinaryTag::of, IntBinaryTag::value));
+            adapters.put(Long.class, TagAdapter.of(Long.class, LongBinaryTag.class, BinaryTagTypes.LONG, LongBinaryTag::of, LongBinaryTag::value));
+            adapters.put(Float.class, TagAdapter.of(Float.class, FloatBinaryTag.class, BinaryTagTypes.FLOAT, FloatBinaryTag::of, FloatBinaryTag::value));
+            adapters.put(Double.class, TagAdapter.of(Double.class, DoubleBinaryTag.class, BinaryTagTypes.DOUBLE, DoubleBinaryTag::of, DoubleBinaryTag::value));
+            adapters.put(String.class, TagAdapter.of(String.class, StringBinaryTag.class, BinaryTagTypes.STRING, StringBinaryTag::of, StringBinaryTag::value));
+            adapters.put(byte[].class, TagAdapter.of(byte[].class, ByteArrayBinaryTag.class, BinaryTagTypes.BYTE_ARRAY, ByteArrayBinaryTag::of, ByteArrayBinaryTag::value));
+            adapters.put(int[].class, TagAdapter.of(int[].class, IntArrayBinaryTag.class, BinaryTagTypes.INT_ARRAY, IntArrayBinaryTag::of, IntArrayBinaryTag::value));
+            adapters.put(long[].class, TagAdapter.of(long[].class, LongArrayBinaryTag.class, BinaryTagTypes.LONG_ARRAY, LongArrayBinaryTag::of, LongArrayBinaryTag::value));
             return adapters;
         }
 

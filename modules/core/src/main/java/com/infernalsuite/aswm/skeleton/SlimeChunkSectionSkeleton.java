@@ -13,14 +13,16 @@ public record SlimeChunkSectionSkeleton(
         NibbleArray light
 ) implements SlimeChunkSection {
 
+    public static final long[] EMPTY_BLOCK_STATES = {};
+
     @Override
     public @NotNull ListBinaryTag getBlockPalette() {
-        return this.blockPalette;
+        return blockPalette != null ? blockPalette : ListBinaryTag.empty();
     }
 
     @Override
     public @NotNull long[] getBlockStates() {
-        return this.blockStates;
+        return blockStates != null ? blockStates : EMPTY_BLOCK_STATES;
     }
 
     @Override
