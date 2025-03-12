@@ -6,6 +6,7 @@ import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
 
 import java.util.List;
+import java.util.function.Consumer;
 
 /**
  * In-memory representation of a SRF chunk.
@@ -73,5 +74,17 @@ public interface SlimeChunk {
      * @return A {@link CompoundBinaryTag} containing the extra data of the chunk,
      */
     @NotNull CompoundBinaryTag getExtraData();
+
+    /**
+     * Puts the provided extra data into the chunk.
+     * @param extraData Extra data to put into.
+     */
+    @NotNull CompoundBinaryTag putExtraData(@Nullable CompoundBinaryTag extraData);
+
+    /**
+     * Updates the chunk extra data using provided customizer function.
+     * @param compoundCustomizer Compound tag customizer function.
+     */
+    @NotNull CompoundBinaryTag updateExtraData(@NotNull Consumer<CompoundBinaryTag.Builder> compoundCustomizer);
 
 }

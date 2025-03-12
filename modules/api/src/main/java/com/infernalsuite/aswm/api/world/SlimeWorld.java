@@ -10,6 +10,7 @@ import org.jetbrains.annotations.Nullable;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
+import java.util.function.Consumer;
 
 /**
  * In-memory representation of a SRF world.
@@ -91,6 +92,18 @@ public interface SlimeWorld {
      * @return A {@link CompoundBinaryTag} containing the extra data of the world.
      */
     @NotNull CompoundBinaryTag getExtraData();
+
+    /**
+     * Puts the provided extra data into the world.
+     * @param extraData Extra data to put into.
+     */
+    @NotNull CompoundBinaryTag putExtraData(@Nullable CompoundBinaryTag extraData);
+
+    /**
+     * Updates the world extra data using provided customizer function.
+     * @param compoundCustomizer Compound tag customizer function.
+     */
+    @NotNull CompoundBinaryTag updateExtraData(@NotNull Consumer<CompoundBinaryTag.Builder> compoundCustomizer);
 
     /**
      * Returns a clone of the world with the given name. This world will never be
