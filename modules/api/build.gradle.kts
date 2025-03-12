@@ -8,7 +8,7 @@ java {
 }
 
 dependencies {
-    api(libs.adventureNbt)
+    compileOnlyApi(libs.adventureNbt)
     compileOnlyApi(libs.jetbrainsAnnotations)
 
     compileOnlyApi(libs.paperApi)
