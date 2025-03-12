@@ -6,7 +6,7 @@ import net.kyori.adventure.nbt.BinaryTag;
 import net.kyori.adventure.nbt.ByteBinaryTag;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.function.Function;
+import java.util.function.Predicate;
 
 /**
  * A slime property of type boolean
@@ -18,7 +18,7 @@ public class SlimePropertyBoolean extends SlimeProperty<Boolean, ByteBinaryTag> 
 		return new SlimePropertyBoolean(key, defaultValue);
 	}
 
-	public static SlimePropertyBoolean create(final @NotNull String key, final boolean defaultValue, final @NotNull Function<Boolean, Boolean> validator) {
+	public static SlimePropertyBoolean create(final @NotNull String key, final boolean defaultValue, final @NotNull Predicate<Boolean> validator) {
 		Preconditions.checkNotNull(key, "Key cannot be null");
 		Preconditions.checkNotNull(validator, "Use SlimePropertyBoolean#create(String, boolean) instead");
 		return new SlimePropertyBoolean(key, defaultValue, validator);
@@ -28,7 +28,7 @@ public class SlimePropertyBoolean extends SlimeProperty<Boolean, ByteBinaryTag> 
 		super(key, defaultValue);
 	}
 
-	private SlimePropertyBoolean(String key, Boolean defaultValue, Function<Boolean, Boolean> validator) {
+	private SlimePropertyBoolean(String key, Boolean defaultValue, Predicate<Boolean> validator) {
 		super(key, defaultValue, validator);
 	}
 

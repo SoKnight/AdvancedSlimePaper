@@ -72,7 +72,7 @@ public class SlimePropertyMap {
     }
 
     public static SlimePropertyMap fromCompound(CompoundBinaryTag tag) {
-        Map<String, BinaryTag> tags = new HashMap<>(tag.size());
+        Map<String, BinaryTag> tags = new HashMap<>(tag.keySet().size());
         tag.forEach(entry -> tags.put(entry.getKey(), entry.getValue()));
         return new SlimePropertyMap(tags);
     }

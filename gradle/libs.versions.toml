@@ -1,6 +1,6 @@
 [versions]
 # common libraries
-adventure = "4.15.0"                # Bundled in Paper 1.16.5
+adventure = "4.7.0"                 # Bundled in Paper 1.16.5
 commonsIo = "2.18.0"
 configurateYaml = "4.2.0"
 fastutil = "8.2.2"                  # Bundled in Paper 1.16.5

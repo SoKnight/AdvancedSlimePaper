@@ -6,7 +6,7 @@ import net.kyori.adventure.nbt.BinaryTag;
 import net.kyori.adventure.nbt.LongArrayBinaryTag;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.function.Function;
+import java.util.function.Predicate;
 
 public class SlimePropertyLongArray extends SlimeProperty<long[], LongArrayBinaryTag> {
 
@@ -15,7 +15,7 @@ public class SlimePropertyLongArray extends SlimeProperty<long[], LongArrayBinar
         return new SlimePropertyLongArray(key, defaultValue);
     }
 
-    public static SlimePropertyLongArray create(final @NotNull String key, final long[] defaultValue, final @NotNull Function<long[], Boolean> validator) {
+    public static SlimePropertyLongArray create(final @NotNull String key, final long[] defaultValue, final @NotNull Predicate<long[]> validator) {
         Preconditions.checkNotNull(key, "Key cannot be null");
         Preconditions.checkNotNull(validator, "Use SlimePropertyLongArray#create(String, long[]) instead");
         return new SlimePropertyLongArray(key, defaultValue, validator);
@@ -25,13 +25,13 @@ public class SlimePropertyLongArray extends SlimeProperty<long[], LongArrayBinar
         super(key, defaultValue);
     }
 
-    private SlimePropertyLongArray(String key, long[] defaultValue, Function<long[], Boolean> validator) {
+    private SlimePropertyLongArray(String key, long[] defaultValue, Predicate<long[]> validator) {
         super(key, defaultValue, validator);
     }
 
     @Override
     protected LongArrayBinaryTag createTag(final long[] value) {
-        return LongArrayBinaryTag.longArrayBinaryTag(value);
+        return LongArrayBinaryTag.of(value);
     }
 
     @Override

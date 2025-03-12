@@ -29,7 +29,7 @@ public class SlimeProperties {
     /**
      * The yaw of the world spawn
      */
-    public static final SlimePropertyFloat SPAWN_YAW = SlimePropertyFloat.create("spawnYaw", 0.0f);
+    public static final SlimePropertyFloat SPAWN_YAW = SlimePropertyFloat.create("spawnYaw", 0.0F);
 
     /**
      * The difficulty set for the world

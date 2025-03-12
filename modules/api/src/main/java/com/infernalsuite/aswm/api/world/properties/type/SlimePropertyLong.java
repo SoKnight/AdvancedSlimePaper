@@ -6,7 +6,7 @@ import net.kyori.adventure.nbt.BinaryTag;
 import net.kyori.adventure.nbt.LongBinaryTag;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.function.Function;
+import java.util.function.Predicate;
 
 public class SlimePropertyLong extends SlimeProperty<Long, LongBinaryTag> {
 
@@ -15,7 +15,7 @@ public class SlimePropertyLong extends SlimeProperty<Long, LongBinaryTag> {
         return new SlimePropertyLong(key, defaultValue);
     }
 
-    public static SlimePropertyLong create(final @NotNull String key, final long defaultValue, final @NotNull Function<Long, Boolean> validator) {
+    public static SlimePropertyLong create(final @NotNull String key, final long defaultValue, final @NotNull Predicate<Long> validator) {
         Preconditions.checkNotNull(key, "Key cannot be null");
         Preconditions.checkNotNull(validator, "Use SlimePropertyLong#create(String, long) instead");
         return new SlimePropertyLong(key, defaultValue, validator);
@@ -25,13 +25,13 @@ public class SlimePropertyLong extends SlimeProperty<Long, LongBinaryTag> {
         super(key, defaultValue);
     }
 
-    private SlimePropertyLong(String key, Long defaultValue, Function<Long, Boolean> validator) {
+    private SlimePropertyLong(String key, Long defaultValue, Predicate<Long> validator) {
         super(key, defaultValue, validator);
     }
 
     @Override
     protected LongBinaryTag createTag(final Long value) {
-        return LongBinaryTag.longBinaryTag(value);
+        return LongBinaryTag.of(value);
     }
 
     @Override

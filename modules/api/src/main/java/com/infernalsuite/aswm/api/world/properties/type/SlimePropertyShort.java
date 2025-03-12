@@ -6,7 +6,7 @@ import net.kyori.adventure.nbt.BinaryTag;
 import net.kyori.adventure.nbt.ShortBinaryTag;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.function.Function;
+import java.util.function.Predicate;
 
 public class SlimePropertyShort extends SlimeProperty<Short, ShortBinaryTag> {
 
@@ -15,7 +15,7 @@ public class SlimePropertyShort extends SlimeProperty<Short, ShortBinaryTag> {
         return new SlimePropertyShort(key, defaultValue);
     }
 
-    public static SlimePropertyShort create(final @NotNull String key, final short defaultValue, final @NotNull Function<Short, Boolean> validator) {
+    public static SlimePropertyShort create(final @NotNull String key, final short defaultValue, final @NotNull Predicate<Short> validator) {
         Preconditions.checkNotNull(key, "Key cannot be null");
         Preconditions.checkNotNull(validator, "Use SlimePropertyShort#create(String, short) instead");
         return new SlimePropertyShort(key, defaultValue, validator);
@@ -25,13 +25,13 @@ public class SlimePropertyShort extends SlimeProperty<Short, ShortBinaryTag> {
         super(key, defaultValue);
     }
 
-    private SlimePropertyShort(String key, Short defaultValue, Function<Short, Boolean> validator) {
+    private SlimePropertyShort(String key, Short defaultValue, Predicate<Short> validator) {
         super(key, defaultValue, validator);
     }
 
     @Override
     protected ShortBinaryTag createTag(final Short value) {
-        return ShortBinaryTag.shortBinaryTag(value);
+        return ShortBinaryTag.of(value);
     }
 
     @Override

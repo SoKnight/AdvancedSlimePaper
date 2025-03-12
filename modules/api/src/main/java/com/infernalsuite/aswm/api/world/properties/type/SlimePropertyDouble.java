@@ -6,7 +6,7 @@ import net.kyori.adventure.nbt.BinaryTag;
 import net.kyori.adventure.nbt.DoubleBinaryTag;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.function.Function;
+import java.util.function.Predicate;
 
 public class SlimePropertyDouble extends SlimeProperty<Double, DoubleBinaryTag> {
 
@@ -15,7 +15,7 @@ public class SlimePropertyDouble extends SlimeProperty<Double, DoubleBinaryTag> 
         return new SlimePropertyDouble(key, defaultValue);
     }
 
-    public static SlimePropertyDouble create(final @NotNull String key, final double defaultValue, final @NotNull Function<Double, Boolean> validator) {
+    public static SlimePropertyDouble create(final @NotNull String key, final double defaultValue, final @NotNull Predicate<Double> validator) {
         Preconditions.checkNotNull(key, "Key cannot be null");
         Preconditions.checkNotNull(validator, "Use SlimePropertyDouble#create(String, double) instead");
         return new SlimePropertyDouble(key, defaultValue, validator);
@@ -25,13 +25,13 @@ public class SlimePropertyDouble extends SlimeProperty<Double, DoubleBinaryTag> 
         super(key, defaultValue);
     }
 
-    private SlimePropertyDouble(String key, Double defaultValue, Function<Double, Boolean> validator) {
+    private SlimePropertyDouble(String key, Double defaultValue, Predicate<Double> validator) {
         super(key, defaultValue, validator);
     }
 
     @Override
     protected DoubleBinaryTag createTag(final Double value) {
-        return DoubleBinaryTag.doubleBinaryTag(value);
+        return DoubleBinaryTag.of(value);
     }
 
     @Override

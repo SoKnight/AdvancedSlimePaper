@@ -6,7 +6,7 @@ import net.kyori.adventure.nbt.BinaryTag;
 import net.kyori.adventure.nbt.FloatBinaryTag;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.function.Function;
+import java.util.function.Predicate;
 
 /**
  * A slime property of type float
@@ -18,7 +18,7 @@ public class SlimePropertyFloat extends SlimeProperty<Float, FloatBinaryTag> {
         return new SlimePropertyFloat(key, defaultValue);
     }
 
-    public static SlimePropertyFloat create(final @NotNull String key, final float defaultValue, final @NotNull Function<Float, Boolean> validator) {
+    public static SlimePropertyFloat create(final @NotNull String key, final float defaultValue, final @NotNull Predicate<Float> validator) {
         Preconditions.checkNotNull(key, "Key cannot be null");
         Preconditions.checkNotNull(validator, "Use SlimePropertyFloat#create(String, float) instead");
         return new SlimePropertyFloat(key, defaultValue, validator);
@@ -28,13 +28,13 @@ public class SlimePropertyFloat extends SlimeProperty<Float, FloatBinaryTag> {
         super(key, defaultValue);
     }
 
-    private SlimePropertyFloat(String key, Float defaultValue, Function<Float, Boolean> validator) {
+    private SlimePropertyFloat(String key, Float defaultValue, Predicate<Float> validator) {
         super(key, defaultValue, validator);
     }
 
     @Override
     protected FloatBinaryTag createTag(final Float value) {
-        return FloatBinaryTag.floatBinaryTag(value);
+        return FloatBinaryTag.of(value);
     }
 
     @Override

@@ -6,7 +6,7 @@ import net.kyori.adventure.nbt.BinaryTag;
 import net.kyori.adventure.nbt.StringBinaryTag;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.function.Function;
+import java.util.function.Predicate;
 
 /**
  * A slime property of type integer
@@ -18,7 +18,7 @@ public class SlimePropertyString extends SlimeProperty<String, StringBinaryTag> 
 		return new SlimePropertyString(key, defaultValue);
 	}
 
-	public static SlimePropertyString create(final @NotNull String key, final String defaultValue, final @NotNull Function<String, Boolean> validator) {
+	public static SlimePropertyString create(final @NotNull String key, final String defaultValue, final @NotNull Predicate<String> validator) {
 		Preconditions.checkNotNull(key, "Key cannot be null");
 		Preconditions.checkNotNull(validator, "Use SlimePropertyString#create(String, String) instead");
 		return new SlimePropertyString(key, defaultValue, validator);
@@ -28,13 +28,13 @@ public class SlimePropertyString extends SlimeProperty<String, StringBinaryTag> 
 		super(key, defaultValue);
 	}
 
-	private SlimePropertyString(String key, String defaultValue, Function<String, Boolean> validator) {
+	private SlimePropertyString(String key, String defaultValue, Predicate<String> validator) {
 		super(key, defaultValue, validator);
 	}
 
 	@Override
 	protected StringBinaryTag createTag(final String value) {
-		return StringBinaryTag.stringBinaryTag(value);
+		return StringBinaryTag.of(value);
 	}
 
 	@Override

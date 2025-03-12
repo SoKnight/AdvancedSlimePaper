@@ -6,7 +6,7 @@ import net.kyori.adventure.nbt.BinaryTag;
 import net.kyori.adventure.nbt.ByteBinaryTag;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.function.Function;
+import java.util.function.Predicate;
 
 public class SlimePropertyByte extends SlimeProperty<Byte, ByteBinaryTag> {
 
@@ -15,7 +15,7 @@ public class SlimePropertyByte extends SlimeProperty<Byte, ByteBinaryTag> {
         return new SlimePropertyByte(key, defaultValue);
     }
 
-    public static SlimePropertyByte create(final @NotNull String key, final byte defaultValue, final @NotNull Function<Byte, Boolean> validator) {
+    public static SlimePropertyByte create(final @NotNull String key, final byte defaultValue, final @NotNull Predicate<Byte> validator) {
         Preconditions.checkNotNull(key, "Key cannot be null");
         Preconditions.checkNotNull(validator, "Use SlimePropertyByte#create(String, byte) instead");
         return new SlimePropertyByte(key, defaultValue, validator);
@@ -25,13 +25,13 @@ public class SlimePropertyByte extends SlimeProperty<Byte, ByteBinaryTag> {
         super(key, defaultValue);
     }
 
-    private SlimePropertyByte(String key, Byte defaultValue, Function<Byte, Boolean> validator) {
+    private SlimePropertyByte(String key, Byte defaultValue, Predicate<Byte> validator) {
         super(key, defaultValue, validator);
     }
 
     @Override
     protected ByteBinaryTag createTag(final Byte value) {
-        return ByteBinaryTag.byteBinaryTag(value);
+        return ByteBinaryTag.of(value);
     }
 
     @Override

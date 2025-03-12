@@ -9,6 +9,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 public class SlimePropertyList<T, Z extends BinaryTag> extends SlimeProperty<List<T>, ListBinaryTag> {
 
@@ -30,7 +31,7 @@ public class SlimePropertyList<T, Z extends BinaryTag> extends SlimeProperty<Lis
     public static <T, Z extends BinaryTag> SlimePropertyList<T, Z> create(
             final @NotNull String key,
             final @NotNull List<T> defaultValue,
-            final @NotNull Function<List<T>, Boolean> validator,
+            final @NotNull Predicate<List<T>> validator,
             final @NotNull BinaryTagType<Z> listTagElementType,
             final @NotNull Function<T, Z> elementTagConverter,
             final @NotNull Function<Z, T> elementTagExtractor
@@ -55,7 +56,7 @@ public class SlimePropertyList<T, Z extends BinaryTag> extends SlimeProperty<Lis
         this.elementTagExtractor = elementTagExtractor;
     }
 
-    private SlimePropertyList(String key, List<T> defaultValue, Function<List<T>, Boolean> validator, BinaryTagType<Z> listTagElementType, Function<T, Z> elementTagConverter, Function<Z, T> elementTagExtractor) {
+    private SlimePropertyList(String key, List<T> defaultValue, Predicate<List<T>> validator, BinaryTagType<Z> listTagElementType, Function<T, Z> elementTagConverter, Function<Z, T> elementTagExtractor) {
         super(key, defaultValue, validator);
         this.listTagElementType = listTagElementType;
         this.elementTagConverter = elementTagConverter;
@@ -65,7 +66,7 @@ public class SlimePropertyList<T, Z extends BinaryTag> extends SlimeProperty<Lis
     @SuppressWarnings("unchecked")
     @Override
     protected ListBinaryTag createTag(final List<T> value) {
-        return ListBinaryTag.listBinaryTag(this.listTagElementType, (List<BinaryTag>) value.stream()
+        return ListBinaryTag.of(this.listTagElementType, (List<BinaryTag>) value.stream()
                 .map(this.elementTagConverter)
                 .toList()
         );
