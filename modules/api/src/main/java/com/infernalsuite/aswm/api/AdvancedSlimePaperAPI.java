@@ -158,6 +158,13 @@ public interface AdvancedSlimePaperAPI {
     ) throws InvalidWorldException, WorldLoadedException, WorldTooBigException, IOException, WorldAlreadyExistsException;
 
     /**
+     * Serialize this Slime world to bytes array.
+     * @param world World to serialize.
+     * @return Serialized world bytes array.
+     */
+    @NotNull byte[] serializeWorld(SlimeWorld world);
+
+    /**
      * Gets the instance of the AdvancedSlimePaper API.
      *
      * @return the instance of the AdvancedSlimePaper API

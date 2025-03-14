@@ -15,10 +15,9 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.util.Arrays;
+import java.util.BitSet;
 import java.util.Collection;
 import java.util.List;
-import java.util.Objects;
 
 @Slf4j
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
@@ -26,20 +25,25 @@ public final class SlimeSerializer {
 
     public static byte[] serialize(SlimeWorld world) {
         CompoundBinaryTag extraData = world.getExtraData();
+        CompoundBinaryTag.Builder extraDataBuilder = CompoundBinaryTag.builder().put(extraData);
 
         // Store world properties
         SlimePropertyMap properties = world.getProperties();
         CompoundBinaryTag propertiesTag = extraData.getCompound("properties").put(properties.toCompound());
-        extraData = !propertiesTag.keySet().isEmpty()
-                ? extraData.put("properties", propertiesTag)
-                : extraData.remove("properties");
+        if (!propertiesTag.keySet().isEmpty()) {
+            extraDataBuilder.put("properties", propertiesTag);
+        } else {
+            extraDataBuilder.remove("properties");
+        }
 
         // Store world maps
         List<CompoundBinaryTag> worldMaps = world.getWorldMaps();
         ListBinaryTag worldMapsTag = ListBinaryTag.from(worldMaps);
-        extraData = worldMapsTag.size() != 0
-                ? extraData.put("worldMaps", worldMapsTag)
-                : extraData.remove("worldMaps");
+        if (!propertiesTag.keySet().isEmpty()) {
+            extraDataBuilder.put("worldMaps", worldMapsTag);
+        } else {
+            extraDataBuilder.remove("worldMaps");
+        }
 
         ByteArrayOutputStream outByteStream = new ByteArrayOutputStream();
         DataOutputStream outStream = new DataOutputStream(outByteStream);
@@ -60,7 +64,7 @@ public final class SlimeSerializer {
             outStream.write(compressedChunkData);
             
             // Extra Tag
-            byte[] extra = serializeCompoundTag(extraData);
+            byte[] extra = serializeCompoundTag(extraDataBuilder.build());
             byte[] compressedExtra = Zstd.compress(extra);
             outStream.writeInt(compressedExtra.length);
             outStream.writeInt(extra.length);
@@ -105,12 +109,23 @@ public final class SlimeSerializer {
     }
 
     private static void serializeChunkSections(SlimeChunk chunk, DataOutputStream outStream) throws IOException {
-        SlimeChunkSection[] sections = Arrays.stream(chunk.getSections())
-                .filter(Objects::nonNull)
-                .toArray(SlimeChunkSection[]::new);
+        SlimeChunkSection[] sections = chunk.getSections();
+        BitSet sectionBitmask = new BitSet(16);
 
-        outStream.writeInt(sections.length);
+        for (int i = 0; i < 16; i++)
+            sectionBitmask.set(i, sections[i] != null);
+
+        byte[] array = sectionBitmask.toByteArray();
+        outStream.write(array);
+
+        int bitmaskPadding = 2 - array.length;
+        for (int i = 0; i < bitmaskPadding; i++)
+            outStream.write(0);
+
         for (SlimeChunkSection section : sections) {
+            if (section == null)
+                continue;
+
             // Block Light
             boolean hasBlockLight = section.getBlockLight() != null;
             outStream.writeBoolean(hasBlockLight);

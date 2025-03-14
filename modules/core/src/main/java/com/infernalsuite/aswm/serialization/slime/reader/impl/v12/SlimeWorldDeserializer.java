@@ -24,6 +24,7 @@ import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.BitSet;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -107,10 +108,15 @@ final class SlimeWorldDeserializer implements SlimeWorldReader<SlimeWorld> {
     }
 
     private static @NotNull SlimeChunkSection[] readChunkSections(DataInputStream chunkData) throws IOException {
-        SlimeChunkSection[] chunkSections = new SlimeChunkSection[16];
-        int sectionCount = chunkData.readInt();
+        byte[] sectionBitmask = new byte[2];
+        chunkData.read(sectionBitmask);
+        BitSet sectionBitset = BitSet.valueOf(sectionBitmask);
 
-        for (int sectionId = 0; sectionId < sectionCount; sectionId++) {
+        SlimeChunkSection[] chunkSections = new SlimeChunkSection[16];
+        for (int sectionId = 0; sectionId < 16; sectionId++) {
+            if (!sectionBitset.get(sectionId))
+                continue;
+
             // Block/Sky Light Nibble Array
             NibbleArray blockLightArray = readChunkSectionNibbleArray(chunkData);
             NibbleArray skyLightArray = readChunkSectionNibbleArray(chunkData);
@@ -122,14 +128,17 @@ final class SlimeWorldDeserializer implements SlimeWorldReader<SlimeWorld> {
                 int serializedDataLength = chunkData.readInt();
                 byte[] serializedData = new byte[serializedDataLength];
                 chunkData.read(serializedData);
-                blockPaletteTags.add(readCompound(serializedData));
+                CompoundBinaryTag element = readCompound(serializedData);
+                if (element != null) {
+                    blockPaletteTags.add(element);
+                }
             }
             ListBinaryTag blockPalette = ListBinaryTag.from(blockPaletteTags);
 
             // Block states
             int blockStatesLength = chunkData.readInt();
             long[] blockStates = blockStatesLength > 0 ? new long[blockStatesLength] : EMPTY_LONG_ARRAY;
-            for (int i = 0; i < blockPaletteLength; i++)
+            for (int i = 0; i < blockStatesLength; i++)
                 blockStates[i] = chunkData.readLong();
 
             chunkSections[sectionId] = new SlimeChunkSectionSkeleton(blockPalette, blockStates, blockLightArray, skyLightArray);

@@ -16,7 +16,7 @@
 Custom chunk format
 4 byte (int) - chunk x
 4 byte (int) - chunk z
-4 bytes (int) section count
+2 bytes - sections bitmask (bottom to top)
 [for each section]
   4 bytes (int) - block palette array size
     <array of block palette nbt compounds>

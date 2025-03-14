@@ -25,6 +25,7 @@ import java.util.*;
 public class SWPlugin extends JavaPlugin {
 
     private static final AdvancedSlimePaperAPI API = AdvancedSlimePaperAPI.get();
+    private static final SlimeInternalsBridge BRIDGE = SlimeInternalsBridge.get();
     private static SWPlugin INSTANCE;
 
     private final Map<String, SlimeWorld> worldsToLoad;
@@ -69,7 +70,7 @@ public class SWPlugin extends JavaPlugin {
             SlimeWorld netherWorld = getServer().getAllowNether() ? worldsToLoad.get(defaultWorldName + "_nether") : null;
             SlimeWorld endWorld = getServer().getAllowEnd() ? worldsToLoad.get(defaultWorldName + "_the_end") : null;
 
-            SlimeInternalsBridge.get().setDefaultWorlds(defaultWorld, netherWorld, endWorld);
+            BRIDGE.setDefaultWorlds(defaultWorld, netherWorld, endWorld);
         } catch (IOException ex) {
             getSLF4JLogger().error("Failed to retrieve default world name", ex);
         }
@@ -90,6 +91,23 @@ public class SWPlugin extends JavaPlugin {
                 });
 
         worldsToLoad.clear(); // Don't unnecessarily hog up memory
+    }
+
+    @Override
+    public void onDisable() {
+        Bukkit.getWorlds().stream()
+                .map(BRIDGE::getInstance)
+                .filter(Objects::nonNull)
+                .filter(world -> !world.isReadOnly())
+                .forEach(world -> {
+                    if (world instanceof SlimeWorld slimeWorld) {
+                        try {
+                            API.saveWorld(slimeWorld);
+                        } catch (IOException ex) {
+                            getSLF4JLogger().error("Failed to save world '{}'!", slimeWorld.getName(), ex);
+                        }
+                    }
+                });
     }
 
     private List<String> loadWorlds() {
