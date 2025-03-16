@@ -18,6 +18,8 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
+import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
 import org.bukkit.command.CommandSender;
 import org.incendo.cloud.annotations.Argument;
 import org.incendo.cloud.annotations.Command;
@@ -75,7 +77,7 @@ public final class CreateWorldCmd extends SlimeCommand {
                     throw new WorldAlreadyExistsException("World already exists");
 
                 WorldData worldData = new WorldData();
-                worldData.setSpawn("0, 64, 0");
+                worldData.setSpawn("0.5, 64, 0.5");
                 worldData.setDataSource(loader.name());
 
                 SlimePropertyMap propertyMap = worldData.toPropertyMap();
@@ -86,9 +88,15 @@ public final class CreateWorldCmd extends SlimeCommand {
                     try {
                         api.loadWorld(slimeWorld, true);
 
-                        // Bedrock block
-                        Location location = new Location(Bukkit.getWorld(worldName), 0, 61, 0);
-                        location.getBlock().setType(Material.BEDROCK);
+                        // Bedrock p*nis
+                        World bukkitWorld = Bukkit.getWorld(worldName);
+                        Location center = new Location(bukkitWorld, 0, 63, 0);
+                        Block centerBlock = center.getBlock();
+                        centerBlock.setType(Material.BEDROCK);
+                        centerBlock.getRelative(BlockFace.EAST).setType(Material.BEDROCK);
+                        centerBlock.getRelative(BlockFace.WEST).setType(Material.BEDROCK);
+                        for (int i = 0; i < 3; i++)
+                            centerBlock.getRelative(BlockFace.SOUTH, i).setType(Material.BEDROCK);
 
                         // Config
                         config.getWorlds().put(worldName, worldData);
