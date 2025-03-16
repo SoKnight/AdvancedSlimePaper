@@ -14,7 +14,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.util.Collection;
-import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
 
@@ -25,7 +24,6 @@ public final class SkeletonSlimeWorld implements SlimeWorld {
     private final SlimeLoader loader;
     private final SlimePropertyMap properties;
     private final Long2ObjectMap<SlimeChunk> chunkStorage;
-    private final List<CompoundBinaryTag> worldMaps;
     private final boolean readOnly;
     private final int dataVersion;
     private @NotNull CompoundBinaryTag extraData;
@@ -35,7 +33,6 @@ public final class SkeletonSlimeWorld implements SlimeWorld {
             SlimeLoader loader,
             SlimePropertyMap properties,
             Long2ObjectMap<SlimeChunk> chunkStorage,
-            List<CompoundBinaryTag> worldMaps,
             boolean readOnly,
             int dataVersion,
             @NotNull CompoundBinaryTag extraData
@@ -44,7 +41,6 @@ public final class SkeletonSlimeWorld implements SlimeWorld {
         this.loader = loader;
         this.properties = properties;
         this.chunkStorage = chunkStorage;
-        this.worldMaps = worldMaps;
         this.readOnly = readOnly;
         this.dataVersion = dataVersion;
         putExtraData(extraData);
@@ -124,13 +120,12 @@ public final class SkeletonSlimeWorld implements SlimeWorld {
                 && Objects.equals(loader, that.loader)
                 && Objects.equals(properties, that.properties)
                 && Objects.equals(chunkStorage, that.chunkStorage)
-                && Objects.equals(worldMaps, that.worldMaps)
                 && Objects.equals(extraData, that.extraData);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, loader, properties, chunkStorage, worldMaps, readOnly, dataVersion, extraData);
+        return Objects.hash(name, loader, properties, chunkStorage, readOnly, dataVersion, extraData);
     }
 
     @Override
@@ -140,7 +135,6 @@ public final class SkeletonSlimeWorld implements SlimeWorld {
                 ", name='" + name + '\'' +
                 ", loader=" + loader +
                 ", properties=" + properties +
-                ", worldMaps=" + worldMaps +
                 ", readOnly=" + readOnly +
                 ", dataVersion=" + dataVersion +
                 ", extraData=" + extraData +

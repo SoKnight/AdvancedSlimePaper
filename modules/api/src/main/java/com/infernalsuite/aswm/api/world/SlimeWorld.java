@@ -9,7 +9,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.util.Collection;
-import java.util.List;
 import java.util.function.Consumer;
 
 /**
@@ -61,14 +60,6 @@ public interface SlimeWorld {
      * @param chunk Chunk to update.
      */
     void updateChunk(@NotNull SlimeChunk chunk);
-
-    /**
-     * Returns a {@link Collection} with every world map, serialized
-     * in a {@link CompoundBinaryTag} object.
-     *
-     * @return A {@link Collection} containing every world map.
-     */
-    @NotNull List<CompoundBinaryTag> getWorldMaps();
 
     /**
      * Returns whether read-only is enabled.

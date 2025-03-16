@@ -100,7 +100,7 @@ final class AnvilWorldChunkReader {
         int chunkZ = levelTag.getInt("zPos");
 
         int dataVersion = levelTag.getInt("DataVersion", -1);
-        if (dataVersion != worldVersion) {
+        if (dataVersion != -1 && dataVersion != worldVersion) {
             log.error("Cannot load chunk at ({},{}): data version {} doesn't match world version {}", chunkX, chunkZ, dataVersion, worldVersion);
             return null;
         }

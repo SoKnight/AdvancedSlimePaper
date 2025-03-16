@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 @Slf4j
@@ -45,17 +44,17 @@ public final class AnvilWorldReader implements SlimeWorldReader<AnvilImportData>
                 throw new MismatchedWorldVersionException(worldVersion, CURRENT_WORLD_VERSION);
 
             SlimePropertyMap properties = new SlimePropertyMap();
-            Path environmentDir = resolveEnvironmentDir(worldDir, properties);
+            Path environmentDir = resolveEnvironmentDir(worldDir, data, properties);
 
             Long2ObjectMap<SlimeChunk> chunks = AnvilWorldChunkReader.loadWorldChunks(environmentDir, worldVersion);
             if (chunks.isEmpty())
                 throw new InvalidWorldException(environmentDir);
 
-            List<CompoundBinaryTag> worldMaps = AnvilWorldMapReader.loadWorldMaps(environmentDir);
+//            List<CompoundBinaryTag> worldMaps = AnvilWorldMapReader.loadWorldMaps(environmentDir);
 
-            properties.setValue(SlimeProperties.SPAWN_X, data.x);
-            properties.setValue(SlimeProperties.SPAWN_Y, data.y);
-            properties.setValue(SlimeProperties.SPAWN_Z, data.z);
+            properties.setValue(SlimeProperties.SPAWN_X, data.spawnX);
+            properties.setValue(SlimeProperties.SPAWN_Y, data.spawnY);
+            properties.setValue(SlimeProperties.SPAWN_Z, data.spawnZ);
 
             CompoundBinaryTag.Builder extraDataBuilder = CompoundBinaryTag.builder();
             if (!data.gameRules().isEmpty()) {
@@ -69,7 +68,6 @@ public final class AnvilWorldReader implements SlimeWorldReader<AnvilImportData>
                     importData.loader(),
                     properties,
                     chunks,
-                    worldMaps,
                     true,
                     worldVersion,
                     extraDataBuilder.build()
@@ -80,12 +78,15 @@ public final class AnvilWorldReader implements SlimeWorldReader<AnvilImportData>
     }
 
     private static LevelData readLevelData(Path file) throws IOException, InvalidWorldException {
-        CompoundBinaryTag tag = BinaryTagIO.unlimitedReader().read(file);
+        CompoundBinaryTag tag = BinaryTagIO.unlimitedReader().read(file, BinaryTagIO.Compression.GZIP);
         CompoundBinaryTag dataTag = tag.getCompound("Data");
         if (dataTag.keySet().isEmpty())
             throw new InvalidWorldException(file.getParent());
 
         int dataVersion = dataTag.getInt("DataVersion", -1);
+
+        CompoundBinaryTag dimensionsTag = dataTag.getCompound("WorldGenSettings").getCompound("dimensions");
+        boolean multiDimensional = dimensionsTag.keySet().size() > 1;
 
         Map<String, String> gameRules = new HashMap<>();
         CompoundBinaryTag gameRulesTag = dataTag.getCompound("GameRules");
@@ -100,27 +101,36 @@ public final class AnvilWorldReader implements SlimeWorldReader<AnvilImportData>
         int spawnY = dataTag.getInt("SpawnY", 255);
         int spawnZ = dataTag.getInt("SpawnZ", 0);
 
-        return new LevelData(dataVersion, gameRules, spawnX, spawnY, spawnZ);
+        return new LevelData(dataVersion, multiDimensional, gameRules, spawnX, spawnY, spawnZ);
     }
 
-    private static @NotNull Path resolveEnvironmentDir(Path worldDir, SlimePropertyMap properties) {
-        Path environmentDir = worldDir.resolve("DIM-1");
-        if (Files.isDirectory(environmentDir)) {
-            properties.setValue(SlimeProperties.ENVIRONMENT, "nether");
-            return environmentDir;
+    private static @NotNull Path resolveEnvironmentDir(Path worldDir, LevelData data, SlimePropertyMap properties) {
+        Path netherDim = worldDir.resolve("DIM-1");
+        Path theEndDim = worldDir.resolve("DIM1");
+
+        if (!data.multiDimensional() || !Files.isDirectory(netherDim) || !Files.isDirectory(theEndDim)) {
+            if (Files.isDirectory(netherDim.resolve("region"))) {
+                properties.setValue(SlimeProperties.ENVIRONMENT, "nether");
+                return netherDim;
+            }
+
+            if (Files.isDirectory(theEndDim.resolve("region"))) {
+                properties.setValue(SlimeProperties.ENVIRONMENT, "the_end");
+                return theEndDim;
+            }
         }
 
-        environmentDir = worldDir.resolve("DIM1");
-        if (Files.isDirectory(environmentDir)) {
-            properties.setValue(SlimeProperties.ENVIRONMENT, "the_end");
-            return environmentDir;
-        }
-
-        environmentDir = worldDir;
         properties.setValue(SlimeProperties.ENVIRONMENT, "normal");
-        return environmentDir;
+        return worldDir;
     }
 
-    private record LevelData(int version, Map<String, String> gameRules, int x, int y, int z) { }
+    private record LevelData(
+            int version,
+            boolean multiDimensional,
+            Map<String, String> gameRules,
+            int spawnX,
+            int spawnY,
+            int spawnZ
+    ) { }
 
 }

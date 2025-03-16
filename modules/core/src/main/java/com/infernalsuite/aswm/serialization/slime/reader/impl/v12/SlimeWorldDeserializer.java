@@ -27,7 +27,6 @@ import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @SuppressWarnings("ResultOfMethodCallIgnored")
 final class SlimeWorldDeserializer implements SlimeWorldReader<SlimeWorld> {
@@ -61,11 +60,11 @@ final class SlimeWorldDeserializer implements SlimeWorldReader<SlimeWorld> {
             properties.merge(propertyMap);
         }
 
-        List<CompoundBinaryTag> worldMaps = extraData.getList("worldMaps", BinaryTagTypes.COMPOUND).stream()
-                .map(t -> (CompoundBinaryTag) t)
-                .collect(Collectors.toCollection(ArrayList::new));
+//        List<CompoundBinaryTag> worldMaps = extraData.getList("worldMaps", BinaryTagTypes.COMPOUND).stream()
+//                .map(t -> (CompoundBinaryTag) t)
+//                .collect(Collectors.toCollection(ArrayList::new));
 
-        return new SkeletonSlimeWorld(worldName, loader, properties, chunks, worldMaps, readOnly, worldVersion, extraData);
+        return new SkeletonSlimeWorld(worldName, loader, properties, chunks, readOnly, worldVersion, extraData);
     }
 
     private static @NotNull Long2ObjectMap<SlimeChunk> readChunks(SlimePropertyMap slimePropertyMap, byte[] chunkBytes) throws IOException {

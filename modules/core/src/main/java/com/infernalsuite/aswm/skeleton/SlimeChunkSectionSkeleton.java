@@ -9,8 +9,8 @@ import org.jetbrains.annotations.Nullable;
 public record SlimeChunkSectionSkeleton(
         ListBinaryTag blockPalette,
         long[] blockStates,
-        NibbleArray block,
-        NibbleArray light
+        NibbleArray blockLight,
+        NibbleArray skyLight
 ) implements SlimeChunkSection {
 
     public static final long[] EMPTY_BLOCK_STATES = {};
@@ -27,12 +27,12 @@ public record SlimeChunkSectionSkeleton(
 
     @Override
     public @Nullable NibbleArray getBlockLight() {
-        return this.block;
+        return this.blockLight;
     }
 
     @Override
     public @Nullable NibbleArray getSkyLight() {
-        return this.light;
+        return this.skyLight;
     }
 
 }

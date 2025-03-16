@@ -37,13 +37,13 @@ public final class SlimeSerializer {
         }
 
         // Store world maps
-        List<CompoundBinaryTag> worldMaps = world.getWorldMaps();
-        ListBinaryTag worldMapsTag = ListBinaryTag.from(worldMaps);
-        if (!propertiesTag.keySet().isEmpty()) {
-            extraDataBuilder.put("worldMaps", worldMapsTag);
-        } else {
-            extraDataBuilder.remove("worldMaps");
-        }
+//        List<CompoundBinaryTag> worldMaps = world.getWorldMaps();
+//        ListBinaryTag worldMapsTag = ListBinaryTag.from(worldMaps);
+//        if (!propertiesTag.keySet().isEmpty()) {
+//            extraDataBuilder.put("worldMaps", worldMapsTag);
+//        } else {
+//            extraDataBuilder.remove("worldMaps");
+//        }
 
         ByteArrayOutputStream outByteStream = new ByteArrayOutputStream();
         DataOutputStream outStream = new DataOutputStream(outByteStream);
@@ -145,7 +145,9 @@ public final class SlimeSerializer {
             long[] blockStates = section.getBlockStates();
             if (blockStates.length != 0) {
                 outStream.writeInt(blockStates.length);
-                outStream.write(serializeLongArray(blockStates));
+                for (long item : blockStates) {
+                    outStream.writeLong(item);
+                }
             } else {
                 outStream.writeInt(0);
             }

@@ -25,7 +25,6 @@ public final class SkeletonCloning {
                 loader == null ? world.getLoader() : loader,
                 world.getProperties().clone(),
                 cloneChunkStorage(world.getChunkStorage()),
-                deepClone(world.getWorldMaps()),
                 loader == null || world.isReadOnly(),
                 world.getDataVersion(),
                 cloneExtraData(world.getExtraData())
@@ -42,7 +41,6 @@ public final class SkeletonCloning {
                 world.getLoader(),
                 world.getProperties().clone(),
                 chunkStorageCopy,
-                deepClone(world.getWorldMaps()),
                 world.isReadOnly(),
                 world.getDataVersion(),
                 cloneExtraData(world.getExtraData())
