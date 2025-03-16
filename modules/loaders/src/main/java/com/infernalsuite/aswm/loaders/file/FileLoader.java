@@ -47,8 +47,8 @@ public class FileLoader implements SlimeLoader {
     public List<String> listWorlds() throws NotDirectoryException {
         try (Stream<Path> paths = Files.list(worldDir)) {
             return paths.filter(Files::isRegularFile)
-                    .filter(path -> path.endsWith(".slime"))
                     .map(path -> path.getFileName().toString())
+                    .filter(name -> name.endsWith(".slime"))
                     .map(name -> name.substring(0, name.length() - 6))
                     .toList();
         } catch (IOException ignored) {
