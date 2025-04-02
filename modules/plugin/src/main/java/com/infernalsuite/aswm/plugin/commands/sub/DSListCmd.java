@@ -71,15 +71,15 @@ public final class DSListCmd extends SlimeCommand {
                         Component.text("There %s only %d page%s!".formatted(maxPages == 1 ? "is" : "are", maxPages, maxPages == 1 ? "" : "s")).color(NamedTextColor.RED)
                 ));
 
-            worldList.sort(String::compareTo);
+            var sortedList = worldList.stream().sorted(String::compareTo).toList();
             sender.sendMessage(COMMAND_PREFIX.append(
                     Component.text("World list ").color(NamedTextColor.YELLOW)
                             .append(Component.text("[%d/%d]".formatted(page, maxPages)).color(NamedTextColor.YELLOW))
                             .append(Component.text(":").color(NamedTextColor.GRAY))
             ));
 
-            for (int i = offset; (i - offset) < MAX_ITEMS_PER_PAGE && i < worldList.size(); i++) {
-                String world = worldList.get(i);
+            for (int i = offset; (i - offset) < MAX_ITEMS_PER_PAGE && i < sortedList.size(); i++) {
+                String world = sortedList.get(i);
                 sender.sendMessage(COMMAND_PREFIX.append(
                         Component.text(" - ").color(NamedTextColor.GRAY)
                                 .append(isLoaded(loader, world)
