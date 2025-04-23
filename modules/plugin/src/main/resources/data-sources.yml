@@ -1,6 +1,7 @@
 # Inside this file is the configuration options
 # for the data sources that SWM supports
 file:
+  enabled: true
   path: slime_worlds
 
 redis:

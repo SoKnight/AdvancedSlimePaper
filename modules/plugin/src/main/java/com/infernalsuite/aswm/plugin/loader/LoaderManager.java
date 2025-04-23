@@ -26,10 +26,12 @@ public class LoaderManager {
 
         // File loader
         DataSourcesConfig.FileConfig fileConfig = config.getFileConfig();
-        try {
-            registerLoader("file", new FileLoader(Paths.get(fileConfig.getPath())));
-        } catch (IOException ex) {
-            log.error("Failed to create file backed loader!", ex);
+        if (fileConfig.isEnabled()) {
+            try {
+                registerLoader("file", new FileLoader(Paths.get(fileConfig.getPath())));
+            } catch (IOException ex) {
+                log.error("Failed to create file backed loader!", ex);
+            }
         }
 
         // Redis loader

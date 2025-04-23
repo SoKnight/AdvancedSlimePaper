@@ -24,6 +24,8 @@ public final class DataSourcesConfig {
     @ConfigSerializable
     public static final class FileConfig {
 
+        @Setting("enabled")
+        private boolean enabled = false;
         @Setting("path")
         private String path = "slime_worlds";
 
