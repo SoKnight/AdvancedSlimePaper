@@ -46,6 +46,7 @@ public class SWPlugin extends JavaPlugin {
         }
 
         this.loaderManager = new LoaderManager();
+        BRIDGE.setLoaders(loaderManager.getLoaders());
 
         List<String> erroredWorlds = loadWorlds();
 

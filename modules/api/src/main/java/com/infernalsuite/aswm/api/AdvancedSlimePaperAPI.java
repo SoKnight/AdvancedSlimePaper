@@ -25,6 +25,14 @@ import java.util.ServiceLoader;
 public interface AdvancedSlimePaperAPI {
 
     /**
+     * Finds a slime loader provided by ASWM.
+     *
+     * @param loaderName the name of the loader to find
+     * @return the wrapped loader, or {@code Optional#empty()} if no loader matches the given name
+     */
+    @NotNull Optional<SlimeLoader> findLoader(@NotNull String loaderName);
+
+    /**
      * Reads a world using a specified {@link SlimeLoader}.
      * <strong>This world won't be loaded into the server's world list.</strong>
      *

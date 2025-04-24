@@ -1,5 +1,6 @@
 package com.infernalsuite.aswm.api;
 
+import com.infernalsuite.aswm.api.loaders.SlimeLoader;
 import com.infernalsuite.aswm.api.world.SlimeWorld;
 import com.infernalsuite.aswm.api.world.SlimeWorldInstance;
 import net.kyori.adventure.nbt.CompoundBinaryTag;
@@ -9,6 +10,7 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
+import java.util.Map;
 import java.util.ServiceLoader;
 
 @ApiStatus.Internal
@@ -41,6 +43,10 @@ public interface SlimeInternalsBridge {
     boolean shouldBeAdded(World world);
 
     boolean trySaveChunk(Object world, Object chunkAccess);
+
+    // конченный способ, i know it, но с такой архитектурой иначе ток хуй сосать
+    Map<String, SlimeLoader> getLoaders();
+    void setLoaders(Map<String, SlimeLoader> loaders);
 
     static @NotNull SlimeInternalsBridge get() {
         return Holder.INSTANCE;
