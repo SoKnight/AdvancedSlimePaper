@@ -12,8 +12,8 @@ import java.util.stream.Collectors;
 
 public class RedisLoader implements SlimeLoader {
 
-    private static final String WORLD_DATA_PREFIX = "aswm:world:data:";
-    private static final String WORLD_LIST_PREFIX = "aswm:world:list";
+    private static final String WORLD_DATA_PREFIX = "asa:world:";
+    private static final String WORLD_LIST_PREFIX = "asa:worlds";
 
     private final RedisCommands<String, byte[]> connection;
 
